@@ -1,0 +1,1698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Just Met Her</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#F3EEE1;
+    --surface:#FFFFFF;
+    --surface-2:#FBF6EA;
+    --border:#DDD2B8;
+    --text:#1C2420;
+    --text-muted:#5E6F63;
+    --accent:#BD4E1C;
+    --accent-ink:#FFFFFF;
+    --accent-2:#8F6F1E;
+    --success:#3C7A57;
+    --success-bg:#E4EEE3;
+    --danger:#AE3A2D;
+    --danger-bg:#F6E4E0;
+    --tribe-1:#3E6E8E;
+    --tribe-2:#A3792E;
+    --tribe-3:#5F7A3A;
+    --tribe-4:#7A4F6B;
+    --tribe-5:#3E8E82;
+    --tribe-6:#8E4E3E;
+    --tribe-none:#8A8278;
+    --shadow: 0 1px 2px rgba(30,30,20,0.06), 0 6px 20px -8px rgba(30,30,20,0.18);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#131F1B;
+      --surface:#1B2A25;
+      --surface-2:#20332C;
+      --border:#36504A;
+      --text:#ECE6D6;
+      --text-muted:#9DB2A5;
+      --accent:#E07438;
+      --accent-ink:#1B1304;
+      --accent-2:#D7B257;
+      --success:#5DA982;
+      --success-bg:#1E3A2B;
+      --danger:#DA6A5D;
+      --danger-bg:#3A2320;
+      --tribe-1:#72AEDA;
+      --tribe-2:#D7A754;
+      --tribe-3:#9CB15C;
+      --tribe-4:#B37AA8;
+      --tribe-5:#5FCBBB;
+      --tribe-6:#D28A6E;
+      --tribe-none:#8CA198;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px -10px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#131F1B;
+    --surface:#1B2A25;
+    --surface-2:#20332C;
+    --border:#36504A;
+    --text:#ECE6D6;
+    --text-muted:#9DB2A5;
+    --accent:#E07438;
+    --accent-ink:#1B1304;
+    --accent-2:#D7B257;
+    --success:#5DA982;
+    --success-bg:#1E3A2B;
+    --danger:#DA6A5D;
+    --danger-bg:#3A2320;
+    --tribe-1:#72AEDA;
+    --tribe-2:#D7A754;
+    --tribe-3:#9CB15C;
+    --tribe-4:#B37AA8;
+    --tribe-5:#5FCBBB;
+    --tribe-6:#D28A6E;
+    --tribe-none:#8CA198;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px -10px rgba(0,0,0,0.6);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    min-height:100%;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  a{color:var(--accent);}
+  .num{font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums;}
+  .display{font-family:"Big Shoulders Display", ui-sans-serif, sans-serif; letter-spacing:0.01em;}
+  button, select, input, textarea{font-family:inherit; font-size:inherit; color:inherit;}
+  button{cursor:pointer;}
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, .chip:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+
+  #app{max-width:1080px; margin:0 auto; padding:0 20px 64px;}
+
+  /* ---- top bar ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:22px 0 16px; border-bottom:1px solid var(--border);
+    margin-bottom:4px;
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0;}
+  .torch{width:34px; height:34px; flex:none;}
+  .brand-text{min-width:0;}
+  .brand-text h1{
+    font-family:"Big Shoulders Display"; font-weight:900; font-size:30px; line-height:1;
+    margin:0; letter-spacing:0.01em;
+  }
+  .brand-text .sub{
+    display:block; font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-muted); margin-top:3px; font-weight:600; white-space:nowrap;
+  }
+  .viewer{display:flex; align-items:center; gap:10px; flex:none;}
+  .viewer-avatar{
+    width:34px; height:34px; border-radius:50%; flex:none; background:var(--accent); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+  }
+  .viewer-name{font-weight:600; font-size:14px; white-space:nowrap;}
+  .role-pill{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em; font-weight:700;
+    padding:3px 8px; border-radius:100px; background:var(--accent); color:var(--accent-ink);
+    white-space:nowrap; display:inline-block;
+  }
+  .logout-link{font-size:12px; color:var(--text-muted); white-space:nowrap; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; font-weight:600;}
+  @media (max-width:480px){
+    .topbar{justify-content:flex-start;}
+    .brand-text h1{font-size:24px;}
+  }
+
+  /* ---- tabs ---- */
+  .tabs{
+    display:flex; gap:4px; overflow-x:auto; padding:14px 0; margin-bottom:18px;
+    border-bottom:1px solid var(--border);
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    background:none; border:none; padding:9px 15px; border-radius:100px;
+    font-weight:600; font-size:13.5px; color:var(--text-muted); white-space:nowrap;
+    transition:background .15s, color .15s;
+  }
+  .tab-btn:hover{background:var(--surface-2); color:var(--text);}
+  .tab-btn.active{background:var(--accent); color:var(--accent-ink);}
+
+  /* ---- generic ---- */
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px; box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .card h2{font-family:"Big Shoulders Display"; font-weight:800; font-size:22px; margin:0 0 4px; text-wrap:balance;}
+  .card h3{font-size:14px; font-weight:700; margin:0 0 10px;}
+  .muted{color:var(--text-muted);}
+  .small{font-size:12.5px;}
+  .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .between{justify-content:space-between;}
+  .stack{display:flex; flex-direction:column; gap:14px;}
+  .grid-cols{display:grid; gap:14px;}
+  .empty-state{
+    text-align:center; padding:40px 20px; color:var(--text-muted);
+  }
+  .empty-state .glyph{font-size:30px; margin-bottom:8px; display:block;}
+
+  .btn{
+    border:1px solid var(--border); background:var(--surface-2); color:var(--text);
+    padding:9px 16px; border-radius:10px; font-weight:600; font-size:13.5px;
+    transition:transform .1s, background .15s;
+  }
+  .btn:hover{background:var(--border);}
+  .btn:active{transform:scale(0.98);}
+  .btn.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent;}
+  .btn.primary:hover{filter:brightness(1.07);}
+  .btn.danger{background:var(--danger-bg); color:var(--danger); border-color:transparent;}
+  .btn:disabled{opacity:0.45; cursor:not-allowed;}
+  .btn.sm{padding:6px 11px; font-size:12px;}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:100px;
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .pill.live{background:var(--success-bg); color:var(--success);}
+  .pill.closed{background:var(--border); color:var(--text-muted);}
+  .pill.danger{background:var(--danger-bg); color:var(--danger);}
+  .dot{width:8px; height:8px; border-radius:50%; flex:none; display:inline-block;}
+
+  label.field-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); display:block; margin-bottom:8px;}
+
+  /* castaway chip picker */
+  .tribe-group{margin-bottom:12px;}
+  .tribe-group:last-child{margin-bottom:0;}
+  .tribe-heading{
+    display:flex; align-items:center; gap:7px; margin-bottom:8px;
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted);
+  }
+  .tribe-heading .dot{width:9px; height:9px;}
+  .chip-grid{display:flex; flex-wrap:wrap; gap:7px;}
+  .chip{
+    border:1px solid var(--border); background:var(--surface-2); border-radius:100px;
+    padding:5px 14px 5px 5px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:7px;
+    transition:border-color .15s, background .15s;
+  }
+  .chip:hover{border-color:var(--accent);}
+  .chip.selected{background:var(--accent); color:var(--accent-ink); border-color:transparent;}
+  .chip.selected .avatar{box-shadow:0 0 0 2px var(--accent-ink);}
+  .chip.eliminated{opacity:0.5;}
+  .chip.eliminated .avatar img{filter:grayscale(1);}
+  .chip.nopick{font-style:italic; padding-left:9px;}
+  .avatar{
+    width:26px; height:26px; border-radius:50%; flex:none; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--border); box-shadow:0 0 0 2px var(--tribe-ring, var(--border));
+  }
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar.nopick-glyph{background:var(--surface); color:var(--text-muted); font-size:13px; box-shadow:0 0 0 2px var(--border);}
+
+  /* profile-card style picker, used on the My Picks page */
+  .pick-card-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .pick-card{
+    width:78px; display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:9px 6px 8px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2);
+    text-align:center; transition:border-color .15s, background .15s;
+  }
+  .pick-card:hover{border-color:var(--accent);}
+  .pick-card.selected{background:var(--accent); border-color:transparent;}
+  .pick-card.selected .pick-card-name, .pick-card.selected .pick-card-pts{color:var(--accent-ink);}
+  .pick-card.selected .avatar-md{box-shadow:0 0 0 2px var(--accent-ink);}
+  .pick-card.eliminated, .pick-card.unavailable{opacity:0.5;}
+  .pick-card.eliminated .avatar-md img, .pick-card.unavailable .avatar-md img{filter:grayscale(1);}
+  .pick-card-name{font-size:12px; font-weight:700; line-height:1.2;}
+  .pick-card-pts{font-size:10.5px; font-weight:600; color:var(--text-muted); font-family:"IBM Plex Mono", monospace;}
+  .avatar-md{
+    width:48px; height:48px; border-radius:50%; flex:none; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; background:var(--border);
+    box-shadow:0 0 0 2px var(--tribe-ring, var(--border));
+  }
+  .avatar-md img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar-md.nopick-glyph{background:var(--surface); color:var(--text-muted); font-size:18px; box-shadow:0 0 0 2px var(--border);}
+
+  /* per-player results rows on the Episode Results tab */
+  .pr-row{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+  .pr-row:last-child{border-bottom:none;}
+  .pr-player{min-width:120px; font-weight:700; font-size:13px; display:flex; align-items:center; gap:8px; flex:none;}
+  .pr-cards{display:flex; gap:6px; flex-wrap:wrap; flex:1; align-items:center;}
+  .pr-card{
+    display:inline-flex; align-items:center; gap:5px; padding:4px 10px 4px 4px; border-radius:100px;
+    font-size:12px; font-weight:600; border:1px solid var(--border); background:var(--surface-2);
+  }
+  .pr-card.correct{background:var(--success-bg); border-color:transparent; color:var(--success);}
+  .pr-card.incorrect{background:var(--danger-bg); border-color:transparent; color:var(--danger);}
+  .pr-card.nopick{color:var(--text-muted); font-style:italic;}
+  .pr-cat{font-size:9px; text-transform:uppercase; letter-spacing:0.05em; opacity:0.75; margin-right:1px;}
+  .pr-avatar{width:20px; height:20px; border-radius:50%; flex:none; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--border);}
+  .pr-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .pr-none{font-size:12.5px; color:var(--text-muted); font-style:italic;}
+
+  select.native{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text); appearance:none;
+  }
+  input.native, textarea.native{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text);
+  }
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--text-muted); font-weight:700; padding:0 10px 8px; border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:11px 10px; border-bottom:1px solid var(--border);}
+  tbody tr:last-child td{border-bottom:none;}
+  .table-wrap{overflow-x:auto;}
+  td.num, th.num{text-align:right;}
+  tr.me{background:var(--surface-2);}
+  .rank{font-family:"Big Shoulders Display"; font-weight:800; font-size:17px;}
+
+  .divider{height:1px; background:var(--border); margin:18px 0;}
+
+  .banner{
+    border:1px dashed var(--accent); border-radius:var(--radius); padding:16px 18px;
+    background:var(--surface-2); margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+
+  .castaway-card{
+    border:1px solid var(--border); border-radius:12px; background:var(--surface-2);
+    padding:12px; display:flex; flex-direction:column; gap:8px; align-items:center; text-align:center;
+  }
+  .castaway-name{font-weight:700; font-size:14px;}
+  .avatar-lg{
+    width:64px; height:64px; border-radius:50%; flex:none; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; background:var(--border);
+    box-shadow:0 0 0 3px var(--tribe-ring, var(--border));
+  }
+  .avatar-lg img{width:100%; height:100%; object-fit:cover; display:block;}
+  .castaway-card.eliminated-card .avatar-lg img{filter:grayscale(1);}
+  .castaway-card.eliminated-card .avatar-lg{opacity:0.55;}
+  .tribe-input{
+    width:100%; padding:6px 9px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); font-size:12.5px; text-align:center;
+  }
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+
+  .admin-section{padding-top:4px;}
+  .admin-section + .admin-section{margin-top:22px; border-top:1px solid var(--border); padding-top:22px;}
+
+  footer.note{text-align:center; color:var(--text-muted); font-size:12px; margin-top:28px;}
+
+  /* ---- auth screen ---- */
+  .auth-wrap{max-width:380px; margin:60px auto 0; padding:0 20px;}
+  .auth-brand{display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:24px; text-align:center;}
+  .auth-brand .torch{width:40px; height:40px;}
+</style>
+</head>
+<body>
+<div id="app"><div class="empty-state"><span class="glyph">🔥</span>Loading the tribe…</div></div>
+
+<script>
+(function(){
+
+  /* =========================================================================
+     SUPABASE SETUP
+  ========================================================================= */
+  var SUPABASE_URL = "https://pokazhrgbhlijtpuxcfg.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_yCECWOy4AR51cb7fUIVCIQ_P-VMkURP";
+  var OWNER_EMAIL = "connorhickox@gmail.com";
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  /* =========================================================================
+     SEED DATA — Survivor 51 roster (Savu & Toka)
+     Photo URLs point at the original Claude Artifact's asset store; see README
+     for re-hosting these to Supabase Storage if that artifact is ever deleted.
+  ========================================================================= */
+  var SEED_CASTAWAYS = [
+    {id:"alexis", name:"Alexis", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/alexis.jpg"},
+    {id:"ana", name:"Ana", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/ana.jpg"},
+    {id:"cristian", name:"Cristian", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/cristian.jpg"},
+    {id:"eric", name:"Eric", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/eric.jpg"},
+    {id:"kristin", name:"Kristin", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/kristin.jpg"},
+    {id:"linnea", name:"Linnea", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/linnea.jpg"},
+    {id:"ori", name:"Ori", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/ori.jpg"},
+    {id:"rob", name:"Rob", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/rob.jpg"},
+    {id:"sharonda", name:"Sharonda", tribe:"Savu", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/sharonda.jpg"},
+    {id:"aaliyah", name:"Aaliyah", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/aaliyah.jpg"},
+    {id:"brady", name:"Brady", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/brady.jpg"},
+    {id:"carter", name:"Carter", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/carter.jpg"},
+    {id:"danny", name:"Danny", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/danny.jpg"},
+    {id:"devin", name:"Devin", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/devin.jpg"},
+    {id:"jelly", name:"Jelly", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/jelly.jpg"},
+    {id:"jenna", name:"Jenna", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/jenna.jpg"},
+    {id:"lewis", name:"Lewis", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/lewis.jpg"},
+    {id:"maggie", name:"Maggie", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/maggie.jpg"},
+    {id:"mike", name:"Mike", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/mike.jpg"},
+    {id:"patt", name:"Patt", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/patt.jpg"},
+    {id:"thien-an", name:"Thien An", tribe:"Toka", photo:"https://pokazhrgbhlijtpuxcfg.supabase.co/storage/v1/object/public/castaway-photos/thien-an.jpg"}
+  ];
+
+  var NO_PICK = "__none__";
+  var CATS = ["reward","immunity","votedOff","safe","mystery"];
+  var CAT_LABEL = {reward:"Reward", immunity:"Immunity", votedOff:"Voted Off", safe:"Safe", mystery:"Mystery Question", winner:"Sole Survivor"};
+  var ALLOW_NOPICK = {reward:true, immunity:true, votedOff:true, safe:false, mystery:true, winner:false};
+
+  /* =========================================================================
+     STATE
+  ========================================================================= */
+  var session = null;
+  var authMode = "login";
+  var myId = null;             // profiles.id (uuid)
+  var myProfile = {id:null, name:"", email:null};
+  var canAdmin = false;
+
+  var castaways = {};
+  var episodes = {};
+  var players = {};             // profiles.id -> {name, isCommissioner, historical}
+
+  var activeTab = "picks";
+  var myPicksCache = {};
+  var myPicksLoaded = false;
+  var leaderboardData = null;
+  var leaderboardLoading = false;
+  var adminSelectedEpisode = null;
+  var resultsDraft = {};
+
+  /* =========================================================================
+     UTIL
+  ========================================================================= */
+  function $(sel, root){ return (root||document).querySelector(sel); }
+  function el(tag, attrs, children){
+    var e = document.createElement(tag);
+    attrs = attrs || {};
+    for (var k in attrs){
+      if (k === "class") e.className = attrs[k];
+      else if (k === "html") e.innerHTML = attrs[k];
+      else if (k.indexOf("on") === 0 && typeof attrs[k] === "function") e.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] === false || attrs[k] == null) { /* omit falsy boolean attrs (e.g. disabled:false) */ }
+      else if (attrs[k] === true) e.setAttribute(k, "");
+      else e.setAttribute(k, attrs[k]);
+    }
+    (children||[]).forEach(function(c){ if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function castawayName(id){
+    if (id === NO_PICK || !id) return "No Pick";
+    var c = castaways[id];
+    return c ? c.name : "(unknown)";
+  }
+  function tribeColor(tribe){
+    if (!tribe) return "var(--tribe-none)";
+    var hash = 0;
+    for (var i=0;i<tribe.length;i++){ hash = (hash*31 + tribe.charCodeAt(i)) % 6; }
+    return "var(--tribe-"+(((hash%6)+6)%6 + 1)+")";
+  }
+  function activeCastaways(){
+    return Object.keys(castaways).map(function(id){return castaways[id];}).filter(function(c){return !c.eliminated;})
+      .sort(function(a,b){ return a.name.localeCompare(b.name); });
+  }
+  function allCastaways(){
+    return Object.keys(castaways).map(function(id){return castaways[id];}).sort(function(a,b){
+      return a.name.localeCompare(b.name);
+    });
+  }
+  function groupByTribe(list){
+    var byTribe = {};
+    list.forEach(function(c){
+      var key = c.tribe || "";
+      byTribe[key] = byTribe[key] || [];
+      byTribe[key].push(c);
+    });
+    var tribeNames = Object.keys(byTribe).filter(function(t){return t!=="";}).sort();
+    var groups = tribeNames.map(function(t){ return {tribe:t, members:byTribe[t]}; });
+    if (byTribe[""]) groups.push({tribe:null, members:byTribe[""]});
+    return groups;
+  }
+  function avatarEl(c){
+    if (!c){
+      return el("span", {class:"avatar nopick-glyph"}, ["–"]);
+    }
+    var ring = tribeColor(c.tribe);
+    if (!c.photo){
+      return el("span", {class:"avatar", style:"box-shadow:0 0 0 2px "+ring+"; background:"+ring+"; color:var(--accent-ink); font-weight:700; font-size:11px;"}, [c.name.charAt(0)]);
+    }
+    return el("span", {class:"avatar", style:"box-shadow:0 0 0 2px "+ring+";"}, [
+      el("img", {src:c.photo, alt:"", loading:"lazy"})
+    ]);
+  }
+  function avatarLgEl(c){
+    var ring = tribeColor(c.tribe);
+    if (!c.photo){
+      return el("span", {class:"avatar-lg", style:"box-shadow:0 0 0 3px "+ring+"; background:"+ring+"; color:var(--accent-ink); font-weight:700; font-size:22px;"}, [c.name.charAt(0)]);
+    }
+    return el("span", {class:"avatar-lg", style:"box-shadow:0 0 0 3px "+ring+";"}, [
+      el("img", {src:c.photo, alt:"", loading:"lazy"})
+    ]);
+  }
+  function avatarMdEl(c){
+    if (!c){
+      return el("span", {class:"avatar-md nopick-glyph"}, ["–"]);
+    }
+    var ring = tribeColor(c.tribe);
+    if (!c.photo){
+      return el("span", {class:"avatar-md", style:"box-shadow:0 0 0 2px "+ring+"; background:"+ring+"; color:var(--accent-ink); font-weight:700; font-size:16px;"}, [c.name.charAt(0)]);
+    }
+    return el("span", {class:"avatar-md", style:"box-shadow:0 0 0 2px "+ring+";"}, [
+      el("img", {src:c.photo, alt:"", loading:"lazy"})
+    ]);
+  }
+  function episodeList(){
+    return Object.keys(episodes).map(function(n){return episodes[n];}).sort(function(a,b){return a.number-b.number;});
+  }
+  function fmtDate(iso){
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleString(undefined, {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"});
+  }
+  function countdown(iso){
+    if (!iso) return null;
+    var ms = new Date(iso).getTime() - Date.now();
+    if (isNaN(ms)) return null;
+    if (ms <= 0) return "closed";
+    var mins = Math.floor(ms/60000);
+    var days = Math.floor(mins/1440); mins -= days*1440;
+    var hrs = Math.floor(mins/60); mins -= hrs*60;
+    var parts = [];
+    if (days) parts.push(days+"d");
+    if (hrs || days) parts.push(hrs+"h");
+    parts.push(mins+"m");
+    return parts.join(" ");
+  }
+  function safeWindow(epNum){ return epNum <= 6 ? "A" : "B"; }
+  function toast(msg, isError){
+    var t = $("#toast");
+    if (!t){ t = el("div", {id:"toast"}); document.body.appendChild(t); }
+    t.textContent = msg;
+    t.style.cssText = "position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:999;"+
+      "background:"+(isError?"var(--danger)":"var(--accent)")+"; color:var(--accent-ink); padding:10px 18px;"+
+      "border-radius:10px; font-weight:600; font-size:13.5px; box-shadow:var(--shadow);";
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.remove(); }, 2600);
+  }
+
+  /* =========================================================================
+     SCORING ENGINE (unchanged from the original — storage-agnostic)
+  ========================================================================= */
+  function catPoints(ep, cat){
+    if (cat === "votedOff") return 100;
+    if (cat === "safe") return 10 * ep.number;
+    if (cat === "winner") return 500;
+    var merged = !!ep.merged;
+    if (cat === "reward" || cat === "immunity") return merged ? 100 : 50;
+    if (cat === "mystery") return merged ? 200 : 100;
+    return 0;
+  }
+  function perfectBonus(ep){ return ep.merged ? 200 : 100; }
+
+  function isCorrect(ep, cat, pickVal){
+    if (cat === "safe"){
+      var voted = (ep.results && ep.results.votedOff) || [];
+      return !!pickVal && pickVal !== NO_PICK && voted.indexOf(pickVal) === -1;
+    }
+    var arr = (ep.results && ep.results[cat]) || [];
+    if (pickVal === NO_PICK || !pickVal) return arr.length === 0;
+    return arr.indexOf(pickVal) !== -1;
+  }
+
+  function mvpStreaks(sortedEpisodes, picksByEp){
+    var streak = 0, lastMvp = null;
+    var out = {};
+    sortedEpisodes.forEach(function(ep){
+      var pick = picksByEp[ep.number];
+      if (!pick || !pick.mvp){ streak = 0; lastMvp = null; out[ep.number] = 0; return; }
+      if (pick.mvp === lastMvp && streak > 0) streak += 1; else streak = 1;
+      lastMvp = pick.mvp;
+      out[ep.number] = streak;
+    });
+    return out;
+  }
+
+  function scorePlayer(userId, picksByEp, adjustments){
+    var sorted = episodeList();
+    var streaks = mvpStreaks(sorted, picksByEp);
+    var perEpisode = [];
+    var totals = {points:0, perfectPicks:0, mysteryCorrect:0};
+
+    sorted.forEach(function(ep){
+      var pick = picksByEp[ep.number];
+      if (!ep.locked) return;
+
+      if (!pick){
+        perEpisode.push({episode:ep.number, submitted:false, lines:[], subtotal:0, perfect:false, mvpBonus:0, adjustment:0, total:0});
+        return;
+      }
+
+      var lines = [];
+      var categoryPts = 0;
+      var allCorrect = true;
+      CATS.forEach(function(cat){
+        var val = pick[cat];
+        var pts = catPoints(ep, cat);
+        var ok = isCorrect(ep, cat, val);
+        if (!ok) allCorrect = false;
+        var earned = ok ? pts : 0;
+        categoryPts += earned;
+        lines.push({cat:cat, label:CAT_LABEL[cat], pick:val, correct:ok, pts:earned, max:pts});
+        if (cat === "mystery" && ok) totals.mysteryCorrect += 1;
+      });
+
+      if (ep.isFinale){
+        var wOk = isCorrect(ep, "winner", pick.winner);
+        var wPts = wOk ? 500 : 0;
+        categoryPts += wPts;
+        lines.push({cat:"winner", label:"Sole Survivor", pick:pick.winner, correct:wOk, pts:wPts, max:500});
+        if (wOk && pick.winner){
+          var usedBefore = sorted.filter(function(e){return e.number < ep.number;}).some(function(e){
+            var p = picksByEp[e.number]; return p && p.safe === pick.winner;
+          });
+          if (!usedBefore){
+            lines.push({cat:"finaleBonus", label:"Never-Safe Finale Bonus", pick:null, correct:true, pts:200, max:200});
+            categoryPts += 200;
+          }
+        }
+      }
+
+      var perfect = allCorrect;
+      var perfectPts = 0;
+      if (perfect){
+        perfectPts = perfectBonus(ep);
+        totals.perfectPicks += 1;
+        lines.push({cat:"perfect", label:"Perfect Pick Bonus", pick:null, correct:true, pts:perfectPts, max:perfectPts});
+      }
+
+      var mvpBonus = 0;
+      var mvpStreak = streaks[ep.number] || 0;
+      if (pick.mvp && mvpStreak > 0){
+        ["reward","immunity","votedOff","mystery"].forEach(function(cat){
+          var arr = (ep.results && ep.results[cat]) || [];
+          if (arr.indexOf(pick.mvp) !== -1){
+            mvpBonus += mvpStreak * 10;
+          }
+        });
+      }
+      if (mvpBonus > 0){
+        lines.push({cat:"mvp", label:"MVP Bonus ("+castawayName(pick.mvp)+" × "+mvpStreak+")", pick:null, correct:true, pts:mvpBonus, max:mvpBonus});
+      }
+
+      var adj = (adjustments||[]).filter(function(a){return a.episodeNum === ep.number;})
+        .reduce(function(s,a){return s + (a.delta||0);}, 0);
+      if (adj !== 0){
+        lines.push({cat:"adjustment", label:"Commissioner Adjustment", pick:null, correct:adj>=0, pts:adj, max:adj});
+      }
+
+      var subtotal = categoryPts + perfectPts + mvpBonus + adj;
+      totals.points += subtotal;
+      perEpisode.push({episode:ep.number, submitted:true, lines:lines, subtotal:subtotal, perfect:perfect, mvpBonus:mvpBonus, adjustment:adj, total:subtotal});
+    });
+
+    var lastLockedEp = sorted.filter(function(e){return e.locked;}).sort(function(a,b){return b.number-a.number;})[0];
+    var finalMvpStreakValue = lastLockedEp ? (streaks[lastLockedEp.number]||0)*10 : 0;
+
+    return {userId:userId, totals:totals, perEpisode:perEpisode, finalMvpStreakValue:finalMvpStreakValue, streaks:streaks};
+  }
+
+  /* =========================================================================
+     DB LAYER — thin Firestore-shaped adapters over Supabase, so everything
+     below this block (the entire UI) is unchanged from the original.
+  ========================================================================= */
+  function castawaysCol(){
+    return {
+      doc: function(id){
+        return {
+          set: async function(obj){
+            var row = {id:id, name:obj.name, tribe: obj.tribe===undefined?null:obj.tribe, photo: obj.photo||null,
+              eliminated: !!obj.eliminated, eliminated_episode: (obj.eliminatedEpisode==null?null:obj.eliminatedEpisode)};
+            var r = await sb.from("castaways").upsert(row);
+            if (r.error) throw r.error;
+          },
+          update: async function(partial){
+            var row = {};
+            if ("tribe" in partial) row.tribe = partial.tribe;
+            if ("eliminated" in partial) row.eliminated = partial.eliminated;
+            if ("eliminatedEpisode" in partial) row.eliminated_episode = partial.eliminatedEpisode;
+            var r = await sb.from("castaways").update(row).eq("id", id);
+            if (r.error) throw r.error;
+          }
+        };
+      },
+      get: async function(){
+        var r = await sb.from("castaways").select("*");
+        if (r.error) throw r.error;
+        return { docs: r.data.map(function(row){
+          return { id: row.id, data: function(){ return {name:row.name, tribe:row.tribe, photo:row.photo, eliminated:row.eliminated, eliminatedEpisode:row.eliminated_episode}; } };
+        })};
+      }
+    };
+  }
+
+  function episodesCol(){
+    return {
+      doc: function(numStr){
+        var num = parseInt(numStr,10);
+        return {
+          set: async function(obj){
+            var row = {number:num, picks_deadline: obj.picksDeadline||null, mystery_question: obj.mysteryQuestion||null,
+              merged: !!obj.merged, is_finale: !!obj.isFinale, locked: !!obj.locked, results: obj.results||null};
+            var r = await sb.from("episodes").upsert(row);
+            if (r.error) throw r.error;
+          },
+          update: async function(partial){
+            var row = {};
+            if ("locked" in partial) row.locked = partial.locked;
+            if ("results" in partial) row.results = partial.results;
+            if ("picksDeadline" in partial) row.picks_deadline = partial.picksDeadline;
+            if ("mysteryQuestion" in partial) row.mystery_question = partial.mysteryQuestion;
+            if ("merged" in partial) row.merged = partial.merged;
+            if ("isFinale" in partial) row.is_finale = partial.isFinale;
+            var r = await sb.from("episodes").update(row).eq("number", num);
+            if (r.error) throw r.error;
+          }
+        };
+      },
+      get: async function(){
+        var r = await sb.from("episodes").select("*");
+        if (r.error) throw r.error;
+        return { docs: r.data.map(function(row){
+          return { id:String(row.number), data:function(){ return {number:row.number, picksDeadline:row.picks_deadline, mysteryQuestion:row.mystery_question, merged:row.merged, isFinale:row.is_finale, locked:row.locked, results:row.results}; } };
+        })};
+      }
+    };
+  }
+
+  function playersCol(){
+    return {
+      get: async function(){
+        var r = await sb.from("profiles").select("*");
+        if (r.error) throw r.error;
+        return { docs: r.data.map(function(row){
+          return { id: row.id, data: function(){ return {name:row.name, isCommissioner:row.is_commissioner, historical:row.historical}; } };
+        })};
+      }
+    };
+  }
+
+  function picksCollectionFor(profileId){
+    function fromRow(row){
+      return { episodeNum: row.episode_num, reward: row.reward, immunity: row.immunity, votedOff: row.voted_off,
+        safe: row.safe, mystery: row.mystery, mvp: row.mvp, winner: row.winner, submittedAt: row.submitted_at };
+    }
+    function toRow(obj, epNum){
+      return { profile_id: profileId, episode_num: epNum, reward: obj.reward, immunity: obj.immunity,
+        voted_off: obj.votedOff, safe: obj.safe, mystery: obj.mystery || null, mvp: obj.mvp || null,
+        winner: obj.winner || null, submitted_at: obj.submittedAt };
+    }
+    return {
+      doc: function(epNumStr){
+        var epNum = parseInt(epNumStr,10);
+        return {
+          get: async function(){
+            var r = await sb.from("picks").select("*").eq("profile_id", profileId).eq("episode_num", epNum).maybeSingle();
+            if (r.error) throw r.error;
+            return { exists: !!r.data, data: function(){ return r.data ? fromRow(r.data) : undefined; } };
+          },
+          set: async function(obj){
+            var row = toRow(obj, epNum);
+            var r = await sb.from("picks").upsert(row, {onConflict:"profile_id,episode_num"});
+            if (r.error) throw r.error;
+          }
+        };
+      },
+      get: async function(){
+        var r = await sb.from("picks").select("*").eq("profile_id", profileId);
+        if (r.error) throw r.error;
+        return { docs: r.data.map(function(row){ return { id:String(row.episode_num), data:function(){ return fromRow(row); } }; }) };
+      }
+    };
+  }
+  function myPicksCol(){ return picksCollectionFor(myId); }
+  function picksColFor(uid){ return picksCollectionFor(uid); }
+
+  function adjustmentsCol(){
+    return {
+      where: function(field, op, value){
+        return {
+          get: async function(){
+            var r = await sb.from("adjustments").select("*").eq("profile_id", value);
+            if (r.error) throw r.error;
+            return { docs: r.data.map(function(row){
+              return { data: function(){ return {userId:row.profile_id, episodeNum:row.episode_num, delta:row.delta, note:row.note, createdAt:row.created_at}; } };
+            })};
+          }
+        };
+      },
+      add: async function(obj){
+        var row = {profile_id:obj.userId, episode_num:obj.episodeNum, delta:obj.delta, note:obj.note||"", created_at:obj.createdAt};
+        var r = await sb.from("adjustments").insert(row);
+        if (r.error) throw r.error;
+      }
+    };
+  }
+
+  function snapToMap(snap, mapper){
+    var out = {};
+    snap.docs.forEach(function(d){ out[d.id] = mapper ? mapper(d) : d.data(); });
+    return out;
+  }
+
+  async function loadShared(){
+    try {
+      var cSnap = await castawaysCol().get();
+      castaways = snapToMap(cSnap, function(d){ return Object.assign({id:d.id}, d.data()); });
+    } catch(e){ console.error("castaways load", e); }
+    try {
+      var eSnap = await episodesCol().get();
+      episodes = snapToMap(eSnap);
+    } catch(e){ console.error("episodes load", e); }
+    try {
+      var pSnap = await playersCol().get();
+      players = snapToMap(pSnap);
+    } catch(e){ console.error("players load", e); }
+    render();
+  }
+
+  /* =========================================================================
+     AUTH + INIT
+  ========================================================================= */
+  async function init(){
+    var got = await sb.auth.getSession();
+    session = got.data.session;
+    sb.auth.onAuthStateChange(function(_event, newSession){
+      session = newSession;
+    });
+    await boot();
+  }
+
+  async function boot(){
+    if (!session){
+      myId = null; canAdmin = false; myProfile = {id:null,name:"",email:null};
+      render();
+      return;
+    }
+    await loadMyProfile();
+    await loadShared();
+  }
+
+  async function loadMyProfile(){
+    var uid = session.user.id;
+    try {
+      var r = await sb.from("profiles").select("*").eq("auth_user_id", uid).maybeSingle();
+      if (r.error) throw r.error;
+      if (r.data){
+        myId = r.data.id;
+        canAdmin = !!r.data.is_commissioner;
+        myProfile = {id:myId, name:r.data.name, email:session.user.email};
+      } else {
+        myId = null; canAdmin = false; myProfile = {id:null, name:"", email:session.user.email};
+      }
+    } catch(e){
+      myId = null; canAdmin = false;
+      toast("Couldn't load your profile: "+(e.message||e.code), true);
+    }
+  }
+
+  async function logout(){
+    await sb.auth.signOut();
+    session = null; myId = null; canAdmin = false; myProfile = {id:null,name:"",email:null};
+    leaderboardData = null; myPicksCache = {}; myPicksLoaded = false; activeTab = "picks";
+    render();
+  }
+
+  /* =========================================================================
+     AUTH SCREEN
+  ========================================================================= */
+  function renderAuthScreen(){
+    var app = $("#app");
+    app.innerHTML = "";
+    var wrap = el("div", {class:"auth-wrap"});
+    wrap.appendChild(el("div", {class:"auth-brand"}, [
+      el("div", {class:"torch", html: TORCH_SVG}),
+      el("h1", {class:"display", style:"font-size:28px; margin:0;"}, ["Survivor? I just met her!"]),
+      el("span", {class:"small muted", style:"text-transform:uppercase; letter-spacing:0.1em;"}, ["Fantasy Survivor · Season 51"])
+    ]));
+
+    var isSignup = authMode === "signup";
+    var card = el("div", {class:"card"});
+    card.appendChild(el("h2", {}, [isSignup ? "Create your account" : "Welcome back"]));
+
+    var nameInput = null;
+    var fields = el("div", {class:"stack", style:"margin-top:14px;"});
+    if (isSignup){
+      nameInput = el("input", {class:"native", type:"text", placeholder:"Your name", autocomplete:"name"});
+      fields.appendChild(el("div", {}, [el("label", {class:"field-label"}, ["Name"]), nameInput]));
+    }
+    var emailInput = el("input", {class:"native", type:"email", placeholder:"you@example.com", autocomplete:"email"});
+    fields.appendChild(el("div", {}, [el("label", {class:"field-label"}, ["Email"]), emailInput]));
+    var passwordInput = el("input", {class:"native", type:"password", placeholder: isSignup?"Create a password":"Password", autocomplete: isSignup?"new-password":"current-password"});
+    fields.appendChild(el("div", {}, [el("label", {class:"field-label"}, ["Password"]), passwordInput]));
+    card.appendChild(fields);
+
+    var errorBox = el("div", {class:"small", style:"margin-top:10px; display:none;"});
+    card.appendChild(errorBox);
+
+    var submitBtn = el("button", {class:"btn primary", style:"width:100%; margin-top:16px;"}, [isSignup ? "Sign Up" : "Log In"]);
+    submitBtn.addEventListener("click", async function(){
+      errorBox.style.display = "none";
+      var email = emailInput.value.trim();
+      var password = passwordInput.value;
+      var name = nameInput ? nameInput.value.trim() : "";
+      if (!email || !password || (isSignup && !name)){
+        errorBox.style.color = "var(--danger)";
+        errorBox.textContent = "Please fill in all fields.";
+        errorBox.style.display = "block";
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = isSignup ? "Signing up…" : "Logging in…";
+      try {
+        if (isSignup){
+          var signUpRes = await sb.auth.signUp({ email: email, password: password });
+          if (signUpRes.error) throw signUpRes.error;
+          if (!signUpRes.data.session){
+            errorBox.style.color = "var(--text)";
+            errorBox.textContent = "Check your email to confirm your account, then log in.";
+            errorBox.style.display = "block";
+            submitBtn.disabled = false; submitBtn.textContent = "Sign Up";
+            return;
+          }
+          session = signUpRes.data.session;
+          var isOwner = email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+          var profRes = await sb.from("profiles").insert({
+            auth_user_id: session.user.id, name: name, is_commissioner: isOwner
+          });
+          if (profRes.error) throw profRes.error;
+          await boot();
+        } else {
+          var signInRes = await sb.auth.signInWithPassword({ email: email, password: password });
+          if (signInRes.error) throw signInRes.error;
+          session = signInRes.data.session;
+          await boot();
+        }
+      } catch(e){
+        errorBox.style.color = "var(--danger)";
+        errorBox.textContent = e.message || "Something went wrong.";
+        errorBox.style.display = "block";
+        submitBtn.disabled = false; submitBtn.textContent = isSignup ? "Sign Up" : "Log In";
+      }
+    });
+    card.appendChild(submitBtn);
+
+    var toggleWrap = el("div", {class:"small", style:"text-align:center; margin-top:16px;"}, [
+      isSignup ? "Already have an account? " : "New to the tribe? "
+    ]);
+    var toggleLink = el("a", {href:"#"}, [isSignup ? "Log in" : "Sign up"]);
+    toggleLink.addEventListener("click", function(ev){ ev.preventDefault(); authMode = isSignup ? "login" : "signup"; render(); });
+    toggleWrap.appendChild(toggleLink);
+    card.appendChild(toggleWrap);
+
+    wrap.appendChild(card);
+    app.appendChild(wrap);
+  }
+
+  /* =========================================================================
+     ROOT RENDER
+  ========================================================================= */
+  function render(){
+    if (!session){ renderAuthScreen(); return; }
+    var app = $("#app");
+    app.innerHTML = "";
+    app.appendChild(renderTopbar());
+    app.appendChild(renderTabs());
+
+    var main = el("main", {});
+    if (activeTab === "picks") main.appendChild(renderMyPicks());
+    else if (activeTab === "leaderboard") main.appendChild(renderLeaderboard());
+    else if (activeTab === "episodes") main.appendChild(renderEpisodesTab());
+    else if (activeTab === "castaways") main.appendChild(renderCastawaysTab());
+    else if (activeTab === "admin") main.appendChild(renderAdminTab());
+    app.appendChild(main);
+
+    app.appendChild(el("footer", {class:"note"}, ["Fan-made fantasy game. Not affiliated with CBS or Survivor."]));
+  }
+
+  function renderTopbar(){
+    var bar = el("div", {class:"topbar"});
+    var torch = el("div", {class:"torch", html: TORCH_SVG});
+    var brandText = el("div", {class:"brand-text"}, [
+      el("h1", {class:"display"}, ["Survivor? I just met her!"]),
+      el("span", {class:"sub"}, ["Fantasy Survivor · Season 51"])
+    ]);
+    bar.appendChild(el("div", {class:"brand"}, [torch, brandText]));
+
+    var viewer = el("div", {class:"viewer"});
+    viewer.appendChild(el("div", {class:"viewer-avatar"}, [(myProfile.name||"?").charAt(0).toUpperCase()]));
+    var nameWrap = el("div", {});
+    nameWrap.appendChild(el("div", {class:"viewer-name"}, [myProfile.name || "You"]));
+    var tagsRow = el("div", {class:"row", style:"gap:8px; margin-top:2px;"});
+    if (canAdmin) tagsRow.appendChild(el("span", {class:"role-pill"}, ["Commissioner"]));
+    tagsRow.appendChild(el("button", {class:"logout-link", onclick:logout}, ["Log out"]));
+    nameWrap.appendChild(tagsRow);
+    viewer.appendChild(nameWrap);
+    bar.appendChild(viewer);
+    return bar;
+  }
+
+  var TORCH_SVG = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+    '<path d="M12 2c1.2 1.8 2.6 3 2.6 5 0 1-.6 1.7-1.3 2.3.9-.2 1.9-1 2.3-2.1.9 1.3 1.4 2.6 1.4 3.9 0 2.9-2.2 4.4-2.2 4.4s.5-1.2-.2-2.1c0 0-.2 1.6-1.6 2.6-1 .7-1 1.6-1 1.6s-3-1.1-3-4.1c0-1.6.9-2.6 1.6-3.6-.8.3-1.7 1.1-2 2C8 10.6 8 9.3 8.6 8.1 9.6 6 12 5 12 2z" fill="var(--accent)"/>'+
+    '<rect x="10.4" y="15.5" width="3.2" height="7" rx="0.6" fill="var(--text-muted)"/>'+
+    '</svg>';
+
+  function renderTabs(){
+    var tabs = [
+      {id:"picks", label:"My Picks"},
+      {id:"leaderboard", label:"Leaderboard"},
+      {id:"episodes", label:"Episode Results"},
+      {id:"castaways", label:"Castaways"}
+    ];
+    if (canAdmin) tabs.push({id:"admin", label:"Admin"});
+    var wrap = el("div", {class:"tabs"});
+    tabs.forEach(function(t){
+      wrap.appendChild(el("button", {
+        class:"tab-btn"+(activeTab===t.id?" active":""),
+        onclick:function(){ activeTab = t.id; render(); }
+      }, [t.label]));
+    });
+    return wrap;
+  }
+
+  /* =========================================================================
+     MY PICKS TAB
+  ========================================================================= */
+  function getActiveEpisode(){
+    var open = episodeList().filter(function(e){ return !e.locked; });
+    return open.length ? open[0] : null;
+  }
+
+  function renderMyPicks(){
+    var wrap = el("div", {});
+
+    var ep = getActiveEpisode();
+    if (!ep){
+      wrap.appendChild(el("div", {class:"card"}, [
+        el("div", {class:"empty-state"}, [
+          el("span", {class:"glyph"}, ["⛺"]),
+          el("div", {}, ["No episode is open for picks right now."]),
+          el("div", {class:"small"}, ["Check back once the Commissioner opens the next one."])
+        ])
+      ]));
+      return wrap;
+    }
+
+    if (!myPicksLoaded){
+      loadAllMyPicks();
+      wrap.appendChild(el("div", {class:"empty-state"}, ["Loading your picks…"]));
+      return wrap;
+    }
+
+    var pick = myPicksCache[ep.number] || {};
+    var deadlinePassed = ep.picksDeadline && new Date(ep.picksDeadline).getTime() < Date.now();
+
+    var header = el("div", {class:"card"});
+    header.appendChild(el("div", {class:"row between"}, [
+      el("h2", {}, ["Episode "+ep.number + (ep.isFinale ? " · Finale" : "")]),
+      el("span", {class:"pill "+(deadlinePassed?"closed":"live")}, [deadlinePassed ? "Picks Closed" : "Picks Open"])
+    ]));
+    if (!deadlinePassed){
+      header.appendChild(el("div", {class:"small muted"}, ["Deadline: "+fmtDate(ep.picksDeadline)+" · closes in "+countdown(ep.picksDeadline)]));
+    } else {
+      header.appendChild(el("div", {class:"small muted"}, ["Deadline was "+fmtDate(ep.picksDeadline)+"."]));
+    }
+    wrap.appendChild(header);
+
+    var draft = Object.assign({}, pick);
+
+    var form = el("div", {class:"card"});
+    form.appendChild(mvpSection(draft, deadlinePassed, ep));
+    form.appendChild(el("div", {class:"divider"}));
+    form.appendChild(pickerSection("reward", "Who wins the Reward challenge?", draft, deadlinePassed, ep));
+    form.appendChild(el("div", {class:"divider"}));
+    form.appendChild(pickerSection("immunity", "Who wins the Immunity challenge?", draft, deadlinePassed, ep));
+    form.appendChild(el("div", {class:"divider"}));
+    form.appendChild(pickerSection("votedOff", "Who gets voted off?", draft, deadlinePassed, ep));
+    form.appendChild(el("div", {class:"divider"}));
+    form.appendChild(pickerSection("safe", "Who stays safe?", draft, deadlinePassed, ep));
+    if (ep.mysteryQuestion){
+      form.appendChild(el("div", {class:"divider"}));
+      form.appendChild(pickerSection("mystery", "Mystery Question", draft, deadlinePassed, ep));
+    }
+
+    if (ep.isFinale){
+      form.appendChild(el("div", {class:"divider"}));
+      form.appendChild(pickerSection("winner", "Who wins Survivor? (worth 500 points)", draft, deadlinePassed, ep));
+    }
+
+    if (!deadlinePassed){
+      form.appendChild(el("div", {class:"row", style:"margin-top:16px;"}, [
+        el("button", {class:"btn primary", onclick:function(){ savePick(ep, draft); }}, ["Save Picks"])
+      ]));
+    }
+
+    wrap.appendChild(form);
+    return wrap;
+  }
+
+  function usedSafePicks(epNum){
+    var win = safeWindow(epNum);
+    var used = [];
+    episodeList().forEach(function(e){
+      if (e.number === epNum) return;
+      if (safeWindow(e.number) !== win) return;
+      var p = myPicksCache[e.number];
+      if (p && p.safe) used.push(p.safe);
+    });
+    return used;
+  }
+
+  function renderGroupedChips(pool, selectedId, disabled, onSelect, extraClass, subtitle, isCardDisabled){
+    var wrap = el("div", {});
+    groupByTribe(pool).forEach(function(group){
+      var gWrap = el("div", {class:"tribe-group"});
+      gWrap.appendChild(el("div", {class:"tribe-heading"}, [
+        el("span", {class:"dot", style:"background:"+tribeColor(group.tribe)}),
+        group.tribe || "No Tribe"
+      ]));
+      var grid = el("div", {class:"pick-card-grid"});
+      group.members.forEach(function(c){
+        var selected = selectedId === c.id;
+        var cardDisabled = disabled || (isCardDisabled ? isCardDisabled(c) : false);
+        var cardChildren = [avatarMdEl(c), el("div", {class:"pick-card-name"}, [c.name])];
+        if (subtitle) cardChildren.push(el("div", {class:"pick-card-pts"}, [subtitle(c)]));
+        grid.appendChild(el("button", {
+          class:"pick-card"+(selected?" selected":"")+(extraClass?extraClass(c):""), disabled:cardDisabled,
+          onclick:function(){ onSelect(c); }
+        }, cardChildren));
+      });
+      gWrap.appendChild(grid);
+      wrap.appendChild(gWrap);
+    });
+    return wrap;
+  }
+
+  function pickerSection(cat, label, draft, disabled, ep){
+    var sec = el("div", {style:"margin-bottom:16px;"});
+    sec.appendChild(el("label", {class:"field-label"}, [label]));
+    if (cat === "mystery" && ep.mysteryQuestion){
+      sec.appendChild(el("div", {class:"small muted", style:"margin-bottom:10px;"}, [ep.mysteryQuestion]));
+    }
+    if (cat === "safe"){
+      sec.appendChild(el("div", {class:"small muted", style:"margin-bottom:10px;"}, [
+        "Can't reuse within the current "+(safeWindow(ep.number)==="A"?"episodes 1–6":"post-6")+" window."
+      ]));
+    }
+
+    var pool = activeCastaways();
+    var exclude = cat === "safe" ? usedSafePicks(ep.number) : [];
+
+    if (ALLOW_NOPICK[cat]){
+      var npSelected = draft[cat] === NO_PICK;
+      var npRow = el("div", {class:"pick-card-grid", style:"margin-bottom:10px;"});
+      npRow.appendChild(el("button", {
+        class:"pick-card"+(npSelected?" selected":""), disabled:disabled,
+        onclick:function(){ draft[cat] = NO_PICK; rerenderPicksForm(draft, ep); }
+      }, [avatarMdEl(null), el("div", {class:"pick-card-name"}, ["No Pick"])]));
+      sec.appendChild(npRow);
+    }
+
+    sec.appendChild(renderGroupedChips(pool, draft[cat], disabled, function(c){
+      draft[cat] = c.id; rerenderPicksForm(draft, ep);
+    }, cat === "safe" ? function(c){ return exclude.indexOf(c.id)!==-1 ? " unavailable" : ""; } : null,
+    null,
+    cat === "safe" ? function(c){ return exclude.indexOf(c.id)!==-1; } : null));
+
+    if (cat === "safe" && exclude.length){
+      sec.appendChild(el("div", {class:"small muted", style:"margin-top:6px;"}, ["Grayed out: already used this window."]));
+    }
+    return sec;
+  }
+
+  function mvpValueIfSelected(candidateId, priorMvp, priorStreak){
+    var week = (candidateId === priorMvp && priorMvp) ? priorStreak + 1 : 1;
+    return week * 10;
+  }
+
+  function mvpSection(draft, disabled, ep){
+    var sec = el("div", {});
+    var priorMvp = null, priorStreak = 0;
+    var priorEpisodes = episodeList().filter(function(e){return e.number < ep.number;}).sort(function(a,b){return b.number-a.number;});
+    if (priorEpisodes.length){
+      var prevEp = priorEpisodes[0];
+      var prevPick = myPicksCache[prevEp.number];
+      if (prevPick && prevPick.mvp){
+        priorMvp = prevPick.mvp;
+        var streaks = mvpStreaks(episodeList().filter(function(e){return e.number<=prevEp.number;}), myPicksCache);
+        priorStreak = streaks[prevEp.number] || 0;
+      }
+    }
+    if (!draft.mvp && priorMvp) draft.mvp = priorMvp;
+
+    sec.appendChild(el("label", {class:"field-label"}, ["Most Valuable Player"]));
+    sec.appendChild(el("div", {class:"small muted", style:"margin-bottom:8px;"}, [
+      priorMvp ? "Keep your pick to grow the streak, or switch to reset it to 10 pts." : "Pick your MVP to start earning streak bonuses."
+    ]));
+    sec.appendChild(renderGroupedChips(activeCastaways(), draft.mvp, disabled, function(c){
+      draft.mvp = c.id; rerenderPicksForm(draft, ep);
+    }, null, function(c){
+      return mvpValueIfSelected(c.id, priorMvp, priorStreak)+" pts";
+    }));
+    return sec;
+  }
+
+  function rerenderPicksForm(draft, ep){
+    myPicksCache[ep.number] = draft;
+    render();
+  }
+
+  async function loadAllMyPicks(){
+    try {
+      var snap = await myPicksCol().get();
+      snap.docs.forEach(function(d){ myPicksCache[parseInt(d.id,10)] = d.data(); });
+    } catch(e){
+      toast("Couldn't load your pick history: "+(e.message||e.code), true);
+    }
+    myPicksLoaded = true;
+    render();
+  }
+
+  async function savePick(ep, draft){
+    var required = ["reward","immunity","votedOff","safe"];
+    if (ep.mysteryQuestion) required.push("mystery");
+    if (ep.isFinale) required.push("winner");
+    for (var i=0;i<required.length;i++){
+      if (!draft[required[i]]){ toast("Fill in: "+CAT_LABEL[required[i]], true); return; }
+    }
+    var body = {
+      episodeNum: ep.number,
+      reward: draft.reward, immunity: draft.immunity, votedOff: draft.votedOff,
+      safe: draft.safe, mystery: draft.mystery || null, mvp: draft.mvp || null,
+      winner: draft.winner || null,
+      submittedAt: new Date().toISOString()
+    };
+    try {
+      await myPicksCol().doc(String(ep.number)).set(body);
+      myPicksCache[ep.number] = body;
+      toast("Picks saved.");
+      render();
+    } catch(e){
+      toast("Couldn't save: "+(e.message||e.code||"unknown error"), true);
+    }
+  }
+
+  /* =========================================================================
+     LEADERBOARD TAB
+  ========================================================================= */
+  function renderLeaderboard(){
+    var wrap = el("div", {});
+    var header = el("div", {class:"row between", style:"margin-bottom:12px;"}, [
+      el("h2", {class:"display", style:"font-size:24px;"}, ["Leaderboard"]),
+      el("button", {class:"btn sm", onclick:function(){ loadLeaderboard(true); }}, [leaderboardLoading ? "Refreshing…" : "Refresh"])
+    ]);
+    wrap.appendChild(header);
+
+    if (!leaderboardData && !leaderboardLoading){ loadLeaderboard(false); }
+
+    if (leaderboardLoading && !leaderboardData){
+      wrap.appendChild(el("div", {class:"card empty-state"}, ["Tallying votes…"]));
+      return wrap;
+    }
+    var rows = leaderboardData || [];
+    if (!rows.length){
+      wrap.appendChild(el("div", {class:"card empty-state"}, [
+        el("span", {class:"glyph"}, ["🏆"]),
+        "No one has joined the tribe yet."
+      ]));
+      return wrap;
+    }
+
+    rows.sort(function(a,b){
+      if (b.totals.points !== a.totals.points) return b.totals.points - a.totals.points;
+      if (b.finalMvpStreakValue !== a.finalMvpStreakValue) return b.finalMvpStreakValue - a.finalMvpStreakValue;
+      if (b.totals.mysteryCorrect !== a.totals.mysteryCorrect) return b.totals.mysteryCorrect - a.totals.mysteryCorrect;
+      return b.totals.perfectPicks - a.totals.perfectPicks;
+    });
+
+    var card = el("div", {class:"card"});
+    var tableWrap = el("div", {class:"table-wrap"});
+    var table = el("table", {});
+    table.appendChild(el("thead", {}, [el("tr", {}, [
+      el("th", {}, ["#"]), el("th", {}, ["Player"]), el("th", {class:"num"}, ["Points"]),
+      el("th", {}, ["Current MVP"])
+    ])]));
+    var body = el("tbody", {});
+    rows.forEach(function(r, i){
+      var name = (players[r.userId] && players[r.userId].name) || "Someone";
+      var lastEp = episodeList().filter(function(e){return e.locked;}).sort(function(a,b){return b.number-a.number;})[0];
+      var mvpId = lastEp && r.mvpNow;
+      body.appendChild(el("tr", {class: r.userId===myId ? "me" : ""}, [
+        el("td", {}, [el("span", {class:"rank"}, [String(i+1)])]),
+        el("td", {}, [name]),
+        el("td", {class:"num num"}, [String(r.totals.points)]),
+        el("td", {}, [mvpId ? castawayName(mvpId) : "—"])
+      ]));
+    });
+    table.appendChild(body);
+    tableWrap.appendChild(table);
+    card.appendChild(tableWrap);
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  async function loadLeaderboard(force){
+    if (leaderboardLoading) return;
+    if (leaderboardData && !force) return;
+    leaderboardLoading = true;
+    render();
+    try {
+      var ids = Object.keys(players);
+      var sortedEps = episodeList().sort(function(a,b){return b.number-a.number;});
+      var results = await Promise.all(ids.map(async function(uid){
+        var snap = await picksColFor(uid).get();
+        var picksByEp = {};
+        snap.docs.forEach(function(d){ var data = d.data(); picksByEp[data.episodeNum] = data; });
+        var adjSnap = await adjustmentsCol().where("userId","==",uid).get();
+        var adjustments = adjSnap.docs.map(function(d){return d.data();});
+        var score = scorePlayer(uid, picksByEp, adjustments);
+        var mvpNow = null;
+        for (var j=0;j<sortedEps.length;j++){
+          var p = picksByEp[sortedEps[j].number];
+          if (p && p.mvp){ mvpNow = p.mvp; break; }
+        }
+        score.mvpNow = mvpNow;
+        return score;
+      }));
+      leaderboardData = results;
+    } catch(e){
+      toast("Couldn't load leaderboard: "+(e.message||e.code), true);
+    }
+    leaderboardLoading = false;
+    render();
+  }
+
+  /* =========================================================================
+     EPISODES TAB
+  ========================================================================= */
+  var CAT_SHORT = {reward:"REW", immunity:"IMM", votedOff:"OUT", safe:"SAFE", mystery:"MYS", winner:"WIN"};
+  var EPISODE_CATS = ["reward","immunity","votedOff","safe","mystery","winner"];
+
+  function renderEpisodesTab(){
+    var wrap = el("div", {});
+    var eps = episodeList().sort(function(a,b){return b.number-a.number;});
+    if (!eps.length){
+      wrap.appendChild(el("div", {class:"card empty-state"}, ["No episodes yet."]));
+      return wrap;
+    }
+    if (!leaderboardData && !leaderboardLoading){ loadLeaderboard(false); }
+    eps.forEach(function(ep){
+      wrap.appendChild(renderEpisodeCard(ep));
+    });
+    return wrap;
+  }
+
+  function renderEpisodeCard(ep){
+    var card = el("div", {class:"card"});
+    card.appendChild(el("div", {class:"row between"}, [
+      el("h2", {}, ["Episode "+ep.number + (ep.isFinale ? " · Finale" : "")]),
+      el("span", {class:"pill "+(ep.locked?"closed":"live")}, [ep.locked ? "Scored" : "Open"])
+    ]));
+    if (!ep.locked){
+      card.appendChild(el("div", {class:"small muted"}, ["Deadline "+fmtDate(ep.picksDeadline)]));
+      return card;
+    }
+    var r = ep.results || {};
+    var resultLine = function(cat){
+      var arr = r[cat] || [];
+      return CAT_LABEL[cat]+": "+(arr.length ? arr.map(castawayName).join(", ") : "No Pick");
+    };
+    card.appendChild(el("div", {class:"small", style:"display:flex; flex-direction:column; gap:3px; margin-bottom:14px;"}, [
+      resultLine("reward"), resultLine("immunity"), resultLine("votedOff"),
+      ep.mysteryQuestion ? resultLine("mystery") : null,
+      ep.isFinale ? ("Winner: "+castawayName(r.winner)) : null
+    ].filter(Boolean).map(function(t){ return el("div",{},[t]); })));
+
+    var rowsWrap = el("div", {style:"border-top:1px solid var(--border);"});
+    if (!leaderboardData){
+      rowsWrap.appendChild(el("div", {class:"small muted", style:"padding:12px 0;"}, ["Loading picks…"]));
+    } else {
+      fillPlayerRows(rowsWrap, ep);
+    }
+    card.appendChild(rowsWrap);
+    return card;
+  }
+
+  function prCard(line){
+    var pickId = line.pick;
+    var isNoPick = !pickId || pickId === NO_PICK;
+    var c = isNoPick ? null : castaways[pickId];
+    var avatar = el("span", {class:"pr-avatar"},
+      c && c.photo ? [el("img", {src:c.photo, alt:""})] : [document.createTextNode(isNoPick ? "–" : (c ? c.name.charAt(0) : "?"))]
+    );
+    return el("span", {class:"pr-card "+(line.correct?"correct":"incorrect")}, [
+      el("span", {class:"pr-cat"}, [CAT_SHORT[line.cat] || ""]),
+      avatar,
+      document.createTextNode(isNoPick ? "No Pick" : (c ? c.name : "?"))
+    ]);
+  }
+
+  function fillPlayerRows(container, ep){
+    container.innerHTML = "";
+    var rows = leaderboardData.map(function(score){
+      var row = score.perEpisode.filter(function(r){return r.episode===ep.number;})[0];
+      return row ? {userId:score.userId, row:row} : null;
+    }).filter(Boolean);
+    rows.sort(function(a,b){return b.row.total - a.row.total;});
+    rows.forEach(function(entry){
+      var name = (players[entry.userId]&&players[entry.userId].name) || "Someone";
+      var prRow = el("div", {class:"pr-row"});
+      prRow.appendChild(el("div", {class:"pr-player"}, [name]));
+      if (entry.row.submitted){
+        var cardsWrap = el("div", {class:"pr-cards"});
+        entry.row.lines.filter(function(l){ return EPISODE_CATS.indexOf(l.cat) !== -1; }).forEach(function(l){
+          cardsWrap.appendChild(prCard(l));
+        });
+        prRow.appendChild(cardsWrap);
+      } else {
+        prRow.appendChild(el("div", {class:"pr-none"}, ["No picks submitted"]));
+      }
+      container.appendChild(prRow);
+    });
+  }
+
+  /* =========================================================================
+     CASTAWAYS TAB
+  ========================================================================= */
+  function renderCastawaysTab(){
+    var wrap = el("div", {});
+    groupByTribe(allCastaways()).forEach(function(group){
+      var card = el("div", {class:"card"});
+      card.appendChild(el("h2", {}, [el("span",{class:"dot",style:"background:"+tribeColor(group.tribe)+"; margin-right:8px;"}), group.tribe || "No Tribe"]));
+      var grid = el("div", {class:"grid-cols", style:"grid-template-columns:repeat(auto-fill,minmax(110px,1fr));"});
+      group.members.forEach(function(c){
+        grid.appendChild(el("div", {class:"castaway-card"+(c.eliminated?" eliminated-card":"")}, [
+          avatarLgEl(c),
+          el("div", {class:"castaway-name"}, [c.name]),
+          el("span", {class:"pill "+(c.eliminated?"danger":"live")}, [c.eliminated ? ("Out · Ep "+(c.eliminatedEpisode||"?")) : "In the Game"])
+        ]));
+      });
+      card.appendChild(grid);
+      wrap.appendChild(card);
+    });
+    if (!Object.keys(castaways).length){
+      wrap.appendChild(el("div", {class:"card empty-state"}, ["No roster yet."+(canAdmin ? " Seed it from the Admin tab." : "")]));
+    }
+    return wrap;
+  }
+
+  /* =========================================================================
+     ADMIN TAB
+  ========================================================================= */
+  function renderAdminTab(){
+    var wrap = el("div", {});
+    wrap.appendChild(renderAdminRoster());
+    wrap.appendChild(renderAdminNewEpisode());
+    wrap.appendChild(renderAdminResults());
+    wrap.appendChild(renderAdminAdjustments());
+    return wrap;
+  }
+
+  function renderAdminRoster(){
+    var card = el("div", {class:"card"});
+    card.appendChild(el("h2", {}, ["Roster"]));
+    if (!Object.keys(castaways).length){
+      card.appendChild(el("p", {class:"small muted"}, ["Seed the Season 51 cast to get started."]));
+      card.appendChild(el("button", {class:"btn primary", onclick:seedCastaways}, ["Seed Season 51 Roster"]));
+      return card;
+    }
+    card.appendChild(el("p", {class:"small muted", style:"margin-top:-6px;"}, ["Edit the tribe field to reassign someone (tribe swap, merge, etc.) — leave it blank for no tribe."]));
+    var grid = el("div", {class:"grid-cols", style:"grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"});
+    allCastaways().forEach(function(c){
+      var box = el("div", {class:"castaway-card"+(c.eliminated?" eliminated-card":"")});
+      box.appendChild(avatarLgEl(c));
+      box.appendChild(el("div", {class:"castaway-name"}, [c.name]));
+      var tribeInput = el("input", {class:"tribe-input", value:c.tribe||"", placeholder:"No Tribe"});
+      tribeInput.addEventListener("change", function(){ updateCastawayTribe(c, tribeInput.value); });
+      box.appendChild(tribeInput);
+      box.appendChild(el("button", {
+        class:"btn sm "+(c.eliminated?"":"danger"),
+        onclick:function(){ toggleEliminated(c); }
+      }, [c.eliminated ? "Mark Active" : "Mark Eliminated"]));
+      grid.appendChild(box);
+    });
+    card.appendChild(grid);
+    return card;
+  }
+
+  async function updateCastawayTribe(c, newTribe){
+    var val = newTribe.trim() || null;
+    if (val === (c.tribe||null)) return;
+    try {
+      await castawaysCol().doc(c.id).update({tribe: val});
+      toast(c.name+" is now "+(val || "unassigned")+".");
+      await loadShared();
+    } catch(e){ toast("Failed: "+(e.message||e.code), true); }
+  }
+
+  async function seedCastaways(){
+    try {
+      for (var i=0;i<SEED_CASTAWAYS.length;i++){
+        var c = SEED_CASTAWAYS[i];
+        await castawaysCol().doc(c.id).set({name:c.name, tribe:c.tribe, photo:c.photo||null, eliminated:false, eliminatedEpisode:null});
+      }
+      toast("Roster seeded.");
+      await loadShared();
+    } catch(e){ toast("Seed failed: "+(e.message||e.code), true); }
+  }
+
+  async function toggleEliminated(c){
+    var nowOut = !c.eliminated;
+    var epNum = nowOut ? (prompt("Eliminated in episode #?", String(getActiveEpisode()?getActiveEpisode().number:"")) || null) : null;
+    try {
+      await castawaysCol().doc(c.id).update({eliminated: nowOut, eliminatedEpisode: epNum ? parseInt(epNum,10) : null});
+      await loadShared();
+    } catch(e){ toast("Update failed: "+(e.message||e.code), true); }
+  }
+
+  function renderAdminNewEpisode(){
+    var card = el("div", {class:"card admin-section"});
+    card.appendChild(el("h2", {}, ["Open a New Episode"]));
+    var nextNum = episodeList().reduce(function(m,e){return Math.max(m,e.number);}, 0) + 1;
+
+    var numInput = el("input", {class:"native", type:"number", value:String(nextNum)});
+    var deadlineInput = el("input", {class:"native", type:"datetime-local"});
+    var questionInput = el("textarea", {class:"native", rows:"2", placeholder:"Mystery Question for this episode (optional)"});
+    var mergedCheck = el("input", {type:"checkbox"});
+    var finaleCheck = el("input", {type:"checkbox"});
+
+    var grid = el("div", {class:"form-grid"});
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Episode #"]), numInput]));
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Picks Deadline"]), deadlineInput]));
+    card.appendChild(grid);
+    card.appendChild(el("div", {style:"margin:14px 0;"}, [el("label",{class:"field-label"},["Mystery Question"]), questionInput]));
+    card.appendChild(el("div", {class:"row", style:"margin-bottom:14px;"}, [
+      el("label", {class:"row small"}, [mergedCheck, " Post-merge (higher point values)"]),
+      el("label", {class:"row small"}, [finaleCheck, " This is the Finale"])
+    ]));
+    card.appendChild(el("button", {class:"btn primary", onclick: function(){
+      createEpisode({
+        number: parseInt(numInput.value,10),
+        picksDeadline: deadlineInput.value ? new Date(deadlineInput.value).toISOString() : null,
+        mysteryQuestion: questionInput.value.trim() || null,
+        merged: mergedCheck.checked,
+        isFinale: finaleCheck.checked
+      });
+    }}, ["Create Episode"]));
+    return card;
+  }
+
+  async function createEpisode(data){
+    if (!data.number || !data.picksDeadline){ toast("Episode number and deadline are required.", true); return; }
+    try {
+      await episodesCol().doc(String(data.number)).set({
+        number: data.number, picksDeadline: data.picksDeadline, mysteryQuestion: data.mysteryQuestion,
+        merged: data.merged, isFinale: data.isFinale, locked: false, results: null
+      });
+      toast("Episode "+data.number+" opened.");
+      await loadShared();
+    } catch(e){ toast("Failed: "+(e.message||e.code), true); }
+  }
+
+  function renderAdminResults(){
+    var card = el("div", {class:"card admin-section"});
+    card.appendChild(el("h2", {}, ["Enter Results"]));
+    var unlocked = episodeList().filter(function(e){return !e.locked;});
+    var locked = episodeList().filter(function(e){return e.locked;});
+    if (!unlocked.length){
+      card.appendChild(el("p", {class:"small muted"}, ["No open episodes to score."]));
+      card.appendChild(renderLockedEpisodesList(locked));
+      return card;
+    }
+    var select = el("select", {class:"native"});
+    unlocked.forEach(function(e){
+      select.appendChild(el("option", {value:e.number}, ["Episode "+e.number]));
+    });
+    if (adminSelectedEpisode == null) adminSelectedEpisode = unlocked[0].number;
+    select.value = adminSelectedEpisode;
+    select.onchange = function(){ adminSelectedEpisode = parseInt(select.value,10); resultsDraft = {}; render(); };
+    card.appendChild(el("div", {style:"margin-bottom:14px;"}, [el("label",{class:"field-label"},["Episode"]), select]));
+
+    var ep = episodes[String(adminSelectedEpisode)];
+    if (!ep) return card;
+
+    var draft = resultsDraft;
+    if (!draft._loadedFor || draft._loadedFor !== ep.number){
+      draft = {_loadedFor: ep.number, reward:[], immunity:[], votedOff:[], mystery:[], winner:null};
+      resultsDraft = draft;
+    }
+
+    ["reward","immunity","votedOff"].concat(ep.mysteryQuestion?["mystery"]:[]).forEach(function(cat){
+      card.appendChild(resultPicker(cat, draft));
+    });
+    if (ep.isFinale){
+      card.appendChild(el("label", {class:"field-label"}, ["Sole Survivor"]));
+      card.appendChild(renderGroupedChips(allCastaways(), draft.winner, false, function(c){
+        draft.winner = c.id; render();
+      }));
+    }
+
+    card.appendChild(el("div", {class:"row"}, [
+      el("button", {class:"btn primary", onclick:function(){ lockEpisode(ep, draft); }}, ["Lock & Score Episode "+ep.number])
+    ]));
+    card.appendChild(renderLockedEpisodesList(locked));
+    return card;
+  }
+
+  function renderLockedEpisodesList(locked){
+    if (!locked.length) return el("div", {});
+    var wrap = el("div", {style:"margin-top:20px; padding-top:16px; border-top:1px solid var(--border);"});
+    wrap.appendChild(el("label", {class:"field-label"}, ["Scored Episodes"]));
+    locked.sort(function(a,b){return b.number-a.number;}).forEach(function(e){
+      wrap.appendChild(el("div", {class:"row between", style:"padding:6px 0;"}, [
+        el("span", {class:"small"}, ["Episode "+e.number]),
+        el("button", {class:"btn sm", onclick:function(){ unlockEpisode(e); }}, ["Unlock to Edit"])
+      ]));
+    });
+    return wrap;
+  }
+
+  async function unlockEpisode(ep){
+    if (!confirm("Unlock Episode "+ep.number+"? Scores will recompute once you re-lock it.")) return;
+    try {
+      await episodesCol().doc(String(ep.number)).update({locked:false});
+      adminSelectedEpisode = ep.number;
+      resultsDraft = {
+        _loadedFor: ep.number,
+        reward: (ep.results && ep.results.reward) || [],
+        immunity: (ep.results && ep.results.immunity) || [],
+        votedOff: (ep.results && ep.results.votedOff) || [],
+        mystery: (ep.results && ep.results.mystery) || [],
+        winner: (ep.results && ep.results.winner) || null
+      };
+      toast("Episode "+ep.number+" unlocked.");
+      leaderboardData = null;
+      await loadShared();
+    } catch(e){ toast("Failed: "+(e.message||e.code), true); }
+  }
+
+  function resultPicker(cat, draft){
+    var sec = el("div", {style:"margin-bottom:16px;"});
+    sec.appendChild(el("label", {class:"field-label"}, [CAT_LABEL[cat] + " — who won? (select none for No Pick)"]));
+    groupByTribe(allCastaways()).forEach(function(group){
+      var gWrap = el("div", {class:"tribe-group"});
+      gWrap.appendChild(el("div", {class:"tribe-heading"}, [
+        el("span", {class:"dot", style:"background:"+tribeColor(group.tribe)}),
+        group.tribe || "No Tribe"
+      ]));
+      var grid = el("div", {class:"chip-grid"});
+      group.members.forEach(function(c){
+        var selected = draft[cat].indexOf(c.id) !== -1;
+        grid.appendChild(el("button", {
+          class:"chip"+(selected?" selected":"")+(c.eliminated?" eliminated":""),
+          onclick:function(){
+            var i = draft[cat].indexOf(c.id);
+            if (i===-1) draft[cat].push(c.id); else draft[cat].splice(i,1);
+            render();
+          }
+        }, [avatarEl(c), c.name]));
+      });
+      gWrap.appendChild(grid);
+      sec.appendChild(gWrap);
+    });
+    return sec;
+  }
+
+  async function lockEpisode(ep, draft){
+    if (ep.isFinale && !draft.winner){ toast("Pick the Sole Survivor before locking the finale.", true); return; }
+    if (!confirm("Lock Episode "+ep.number+"? This scores everyone's picks. You can unlock later to correct mistakes.")) return;
+    try {
+      await episodesCol().doc(String(ep.number)).update({
+        locked: true,
+        results: {reward:draft.reward, immunity:draft.immunity, votedOff:draft.votedOff, mystery:draft.mystery||[], winner:draft.winner||null}
+      });
+      toast("Episode "+ep.number+" scored.");
+      leaderboardData = null;
+      resultsDraft = {};
+      await loadShared();
+    } catch(e){ toast("Failed: "+(e.message||e.code), true); }
+  }
+
+  function renderAdminAdjustments(){
+    var card = el("div", {class:"card admin-section"});
+    card.appendChild(el("h2", {}, ["Manual Adjustment"]));
+    card.appendChild(el("p", {class:"small muted"}, ["For disputes or one-off rulings. Applies to a player's total for a given episode."]));
+
+    var playerSelect = el("select", {class:"native"});
+    Object.keys(players).forEach(function(uid){
+      playerSelect.appendChild(el("option", {value:uid}, [players[uid].name || uid]));
+    });
+    var epSelect = el("select", {class:"native"});
+    episodeList().forEach(function(e){ epSelect.appendChild(el("option", {value:e.number}, ["Episode "+e.number])); });
+    var deltaInput = el("input", {class:"native", type:"number", placeholder:"e.g. 50 or -25"});
+    var noteInput = el("input", {class:"native", type:"text", placeholder:"Reason"});
+
+    var grid = el("div", {class:"form-grid"});
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Player"]), playerSelect]));
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Episode"]), epSelect]));
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Points (+/-)"]), deltaInput]));
+    grid.appendChild(el("div", {}, [el("label",{class:"field-label"},["Note"]), noteInput]));
+    card.appendChild(grid);
+    card.appendChild(el("button", {class:"btn primary", style:"margin-top:14px;", onclick:function(){
+      addAdjustment(playerSelect.value, parseInt(epSelect.value,10), parseInt(deltaInput.value,10), noteInput.value);
+    }}, ["Apply Adjustment"]));
+    return card;
+  }
+
+  async function addAdjustment(uid, epNum, delta, note){
+    if (!uid || !epNum || isNaN(delta)){ toast("Fill in all fields.", true); return; }
+    try {
+      await adjustmentsCol().add({userId:uid, episodeNum:epNum, delta:delta, note:note||"", createdAt:new Date().toISOString()});
+      toast("Adjustment applied.");
+      leaderboardData = null;
+      render();
+    } catch(e){ toast("Failed: "+(e.message||e.code), true); }
+  }
+
+  /* boot */
+  init();
+})();
+</script>
+</body>
+</html>

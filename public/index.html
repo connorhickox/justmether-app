@@ -1360,8 +1360,7 @@
       return CAT_LABEL[cat]+": "+(arr.length ? arr.map(castawayName).join(", ") : "No Pick");
     };
     card.appendChild(el("div", {class:"small", style:"display:flex; flex-direction:column; gap:3px; margin-bottom:14px;"}, [
-      resultLine("reward"), resultLine("immunity"), resultLine("votedOff"),
-      ep.mysteryQuestion ? resultLine("mystery") : null,
+      resultLine("reward"), resultLine("immunity"), resultLine("votedOff"), resultLine("mystery"),
       ep.isFinale ? ("Winner: "+castawayName(r.winner)) : null
     ].filter(Boolean).map(function(t){ return el("div",{},[t]); })));
 

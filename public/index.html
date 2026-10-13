@@ -265,6 +265,7 @@
   .pr-avatar{width:20px; height:20px; border-radius:50%; flex:none; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--border);}
   .pr-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .pr-none{font-size:12.5px; color:var(--text-muted); font-style:italic;}
+  .pr-total{font-size:14px; font-weight:800; color:var(--text); flex:none; margin-left:auto; padding-left:8px; white-space:nowrap;}
 
   select.native{
     width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
@@ -1367,10 +1368,12 @@
     var avatar = el("span", {class:"pr-avatar"},
       c && c.photo ? [el("img", {src:c.photo, alt:""})] : [document.createTextNode(isNoPick ? "–" : (c ? c.name.charAt(0) : "?"))]
     );
+    var label = isNoPick ? "No Pick" : (c ? c.name : "?");
+    if (line.correct) label += ": " + line.pts + "pts";
     return el("span", {class:"pr-card "+(line.correct?"correct":"incorrect")}, [
       el("span", {class:"pr-cat"}, [CAT_SHORT[line.cat] || ""]),
       avatar,
-      document.createTextNode(isNoPick ? "No Pick" : (c ? c.name : "?"))
+      document.createTextNode(label)
     ]);
   }
 
@@ -1403,6 +1406,7 @@
           cardsWrap.appendChild(prCard(l));
         });
         prRow.appendChild(cardsWrap);
+        prRow.appendChild(el("div", {class:"pr-total"}, [entry.row.total + " pts"]));
       } else {
         prRow.appendChild(el("div", {class:"pr-none"}, ["No picks submitted"]));
       }

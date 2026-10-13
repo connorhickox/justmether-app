@@ -395,6 +395,9 @@
   var leaderboardLoading = false;
   var adminSelectedEpisode = null;
   var resultsDraft = {};
+  var pickStatusData = null;      // episode_num -> {profile_id -> submittedAt}
+  var pickStatusLoading = false;
+  var pickStatusEpisodeNum = null;
 
   /* =========================================================================
      UTIL
@@ -709,7 +712,7 @@
         var r = await sb.from("profiles").select("*");
         if (r.error) throw r.error;
         return { docs: r.data.map(function(row){
-          return { id: row.id, data: function(){ return {name:row.name, isCommissioner:row.is_commissioner, historical:row.historical}; } };
+          return { id: row.id, data: function(){ return {name:row.name, isCommissioner:row.is_commissioner, historical:row.historical, authUserId:row.auth_user_id}; } };
         })};
       }
     };
@@ -1455,11 +1458,79 @@
   ========================================================================= */
   function renderAdminTab(){
     var wrap = el("div", {});
+    wrap.appendChild(renderAdminPickStatus());
     wrap.appendChild(renderAdminRoster());
     wrap.appendChild(renderAdminNewEpisode());
     wrap.appendChild(renderAdminResults());
     wrap.appendChild(renderAdminAdjustments());
     return wrap;
+  }
+
+  async function loadPickStatus(epNum, force){
+    if (pickStatusLoading) return;
+    if (pickStatusData && pickStatusEpisodeNum === epNum && !force) return;
+    pickStatusLoading = true;
+    render();
+    try {
+      var r = await sb.from("picks").select("profile_id, submitted_at").eq("episode_num", epNum);
+      if (r.error) throw r.error;
+      var map = {};
+      r.data.forEach(function(row){ map[row.profile_id] = row.submitted_at; });
+      pickStatusData = map;
+      pickStatusEpisodeNum = epNum;
+    } catch(e){
+      toast("Couldn't load pick status: "+(e.message||e.code), true);
+    }
+    pickStatusLoading = false;
+    render();
+  }
+
+  function renderAdminPickStatus(){
+    var card = el("div", {class:"card admin-section"});
+    card.appendChild(el("h2", {}, ["Pick Status"]));
+    var ep = getActiveEpisode();
+    if (!ep){
+      card.appendChild(el("p", {class:"small muted"}, ["No episode is currently open for picks."]));
+      return card;
+    }
+    card.appendChild(el("p", {class:"small muted"}, ["Episode "+ep.number+" — who's submitted picks. Only visible to you."]));
+
+    if (pickStatusEpisodeNum !== ep.number) pickStatusData = null;
+    if (!pickStatusData && !pickStatusLoading) loadPickStatus(ep.number);
+    if (!pickStatusData){
+      card.appendChild(el("div", {class:"small muted"}, ["Loading…"]));
+      return card;
+    }
+
+    var rows = Object.keys(players).map(function(uid){
+      var p = players[uid];
+      return { uid:uid, name: p.name || "Someone", hasAccount: !!p.authUserId, submittedAt: pickStatusData[uid] || null };
+    });
+    rows.sort(function(a,b){
+      var aSub = !!a.submittedAt, bSub = !!b.submittedAt;
+      if (aSub !== bSub) return aSub ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
+    var notCount = rows.filter(function(r){ return !r.submittedAt; }).length;
+    card.appendChild(el("p", {class:"small", style:"margin:0 0 10px; font-weight:700;"}, [
+      notCount + " of " + rows.length + " still need to submit."
+    ]));
+
+    var list = el("div", {});
+    rows.forEach(function(r){
+      var row = el("div", {class:"row between", style:"padding:8px 0; border-bottom:1px solid var(--border);"});
+      row.appendChild(el("span", {}, [r.name + (!r.hasAccount ? " (no account yet)" : "")]));
+      row.appendChild(r.submittedAt
+        ? el("span", {class:"pill live"}, ["✓ "+fmtDate(r.submittedAt)])
+        : el("span", {class:"pill closed"}, ["Not yet"]));
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    card.appendChild(el("button", {
+      class:"btn sm", style:"margin-top:12px;",
+      onclick:function(){ loadPickStatus(ep.number, true); }
+    }, [pickStatusLoading ? "Refreshing…" : "Refresh"]));
+    return card;
   }
 
   function renderAdminRoster(){

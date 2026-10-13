@@ -1040,6 +1040,11 @@
     } else {
       header.appendChild(el("div", {class:"small muted"}, ["Deadline was "+fmtDate(ep.picksDeadline)+"."]));
     }
+    if (pick.submittedAt){
+      header.appendChild(el("div", {class:"small", style:"color:var(--success); margin-top:4px;"}, [
+        "✓ Picks saved "+fmtDate(pick.submittedAt)+(deadlinePassed?"":" — you can change them until the deadline.")
+      ]));
+    }
     wrap.appendChild(header);
 
     var draft = Object.assign({}, pick);

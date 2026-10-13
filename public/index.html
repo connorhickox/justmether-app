@@ -276,15 +276,15 @@
     background:var(--surface-2); color:var(--text);
   }
 
-  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px; table-layout:fixed;}
   thead th{
     text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
     color:var(--text-muted); font-weight:700; padding:0 10px 8px; border-bottom:1px solid var(--border);
   }
-  tbody td{padding:11px 10px; border-bottom:1px solid var(--border);}
+  tbody td{padding:11px 10px; border-bottom:1px solid var(--border); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   tbody tr:last-child td{border-bottom:none;}
   .table-wrap{overflow-x:auto;}
-  td.num, th.num{text-align:right;}
+  td.num, th.num{text-align:center;}
   tr.me{background:var(--surface-2);}
   .rank{font-family:"Big Shoulders Display"; font-weight:800; font-size:17px;}
 
@@ -1256,9 +1256,15 @@
     var card = el("div", {class:"card"});
     var tableWrap = el("div", {class:"table-wrap"});
     var table = el("table", {});
+    table.appendChild(el("colgroup", {}, [
+      el("col", {style:"width:36px;"}),
+      el("col", {style:"width:34%;"}),
+      el("col", {style:"width:33%;"}),
+      el("col", {style:"width:33%;"})
+    ]));
     table.appendChild(el("thead", {}, [el("tr", {}, [
       el("th", {}, ["#"]), el("th", {}, ["Player"]), el("th", {class:"num"}, ["Points"]),
-      el("th", {}, ["Current MVP"])
+      el("th", {class:"num"}, ["Current MVP"])
     ])]));
     var body = el("tbody", {});
     rows.forEach(function(r, i){
@@ -1269,7 +1275,7 @@
         el("td", {}, [el("span", {class:"rank"}, [String(i+1)])]),
         el("td", {}, [name]),
         el("td", {class:"num num"}, [String(r.totals.points)]),
-        el("td", {}, [mvpId ? castawayName(mvpId) : "—"])
+        el("td", {class:"num"}, [mvpId ? castawayName(mvpId) : "—"])
       ]));
     });
     table.appendChild(body);

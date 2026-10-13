@@ -1493,7 +1493,7 @@
       card.appendChild(el("p", {class:"small muted"}, ["No episode is currently open for picks."]));
       return card;
     }
-    card.appendChild(el("p", {class:"small muted"}, ["Episode "+ep.number+" — who's submitted picks. Only visible to you."]));
+    card.appendChild(el("p", {class:"small muted"}, ["Episode "+ep.number+" — who's submitted picks."]));
 
     if (pickStatusEpisodeNum !== ep.number) pickStatusData = null;
     if (!pickStatusData && !pickStatusLoading) loadPickStatus(ep.number);

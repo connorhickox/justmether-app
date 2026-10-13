@@ -339,6 +339,14 @@
   var SUPABASE_URL = "https://pokazhrgbhlijtpuxcfg.supabase.co";
   var SUPABASE_ANON_KEY = "sb_publishable_yCECWOy4AR51cb7fUIVCIQ_P-VMkURP";
   var OWNER_EMAIL = "connorhickox@gmail.com";
+  // Captured before the Supabase client can process/strip the URL hash, so we
+  // know whether this page load is someone landing from an invite/recovery
+  // email link (as opposed to an ordinary return visit).
+  var PENDING_AUTH_TYPE = (function(){
+    var h = window.location.hash || "";
+    var m = h.match(/[#&]type=([^&]+)/);
+    return m ? m[1] : null;
+  })();
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   /* =========================================================================
@@ -383,6 +391,7 @@
   var myId = null;             // profiles.id (uuid)
   var myProfile = {id:null, name:"", email:null};
   var canAdmin = false;
+  var needsPasswordSetup = (PENDING_AUTH_TYPE === "invite" || PENDING_AUTH_TYPE === "recovery");
 
   var castaways = {};
   var episodes = {};
@@ -936,10 +945,66 @@
   }
 
   /* =========================================================================
+     SET PASSWORD SCREEN — shown once, right after landing from an invite or
+     password-reset email link, so the player has a password to log back in
+     with later (those links sign them in directly but set no password).
+  ========================================================================= */
+  function renderSetPasswordScreen(){
+    var app = $("#app");
+    app.innerHTML = "";
+    var wrap = el("div", {class:"auth-wrap"});
+    wrap.appendChild(el("div", {class:"auth-brand"}, [
+      el("div", {class:"torch", html: TORCH_SVG}),
+      el("h1", {class:"display", style:"font-size:28px; margin:0;"}, ["Survivor? I just met her!"]),
+      el("span", {class:"small muted", style:"text-transform:uppercase; letter-spacing:0.1em;"}, ["Fantasy Survivor · Season 51"])
+    ]));
+
+    var card = el("div", {class:"card"});
+    card.appendChild(el("h2", {}, ["Set your password"]));
+    card.appendChild(el("p", {class:"small muted", style:"margin-top:-6px;"}, [
+      "You're in! Set a password now so you can log back in next time."
+    ]));
+
+    var fields = el("div", {class:"stack", style:"margin-top:14px;"});
+    var passwordInput = el("input", {class:"native", type:"password", placeholder:"Create a password", autocomplete:"new-password"});
+    fields.appendChild(el("div", {}, [el("label", {class:"field-label"}, ["Password"]), passwordInput]));
+    card.appendChild(fields);
+
+    var errorBox = el("div", {class:"small", style:"margin-top:10px; display:none; color:var(--danger);"});
+    card.appendChild(errorBox);
+
+    var submitBtn = el("button", {class:"btn primary", style:"width:100%; margin-top:16px;"}, ["Save Password"]);
+    submitBtn.addEventListener("click", async function(){
+      var password = passwordInput.value;
+      if (!password || password.length < 6){
+        errorBox.textContent = "Password must be at least 6 characters.";
+        errorBox.style.display = "block";
+        return;
+      }
+      submitBtn.disabled = true; submitBtn.textContent = "Saving…";
+      try {
+        var r = await sb.auth.updateUser({ password: password });
+        if (r.error) throw r.error;
+        needsPasswordSetup = false;
+        await boot();
+      } catch(e){
+        errorBox.textContent = e.message || "Something went wrong.";
+        errorBox.style.display = "block";
+        submitBtn.disabled = false; submitBtn.textContent = "Save Password";
+      }
+    });
+    card.appendChild(submitBtn);
+
+    wrap.appendChild(card);
+    app.appendChild(wrap);
+  }
+
+  /* =========================================================================
      ROOT RENDER
   ========================================================================= */
   function render(){
     if (!session){ renderAuthScreen(); return; }
+    if (needsPasswordSetup){ renderSetPasswordScreen(); return; }
     var app = $("#app");
     app.innerHTML = "";
     app.appendChild(renderTopbar());

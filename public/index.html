@@ -721,7 +721,7 @@
         var r = await sb.from("profiles").select("*");
         if (r.error) throw r.error;
         return { docs: r.data.map(function(row){
-          return { id: row.id, data: function(){ return {name:row.name, isCommissioner:row.is_commissioner, historical:row.historical, authUserId:row.auth_user_id}; } };
+          return { id: row.id, data: function(){ return {name:row.name, isCommissioner:row.is_commissioner, historical:row.historical, authUserId:row.auth_user_id, firstName:row.first_name}; } };
         })};
       }
     };
@@ -1341,7 +1341,9 @@
     ])]));
     var body = el("tbody", {});
     rows.forEach(function(r, i){
-      var name = (players[r.userId] && players[r.userId].name) || "Someone";
+      var p = players[r.userId];
+      var name = (p && p.name) || "Someone";
+      if (p && p.firstName) name += " (" + p.firstName + ")";
       var lastEp = episodeList().filter(function(e){return e.locked;}).sort(function(a,b){return b.number-a.number;})[0];
       var mvpId = lastEp && r.mvpNow;
       body.appendChild(el("tr", {class: r.userId===myId ? "me" : ""}, [

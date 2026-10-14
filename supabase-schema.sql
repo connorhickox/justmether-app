@@ -10,6 +10,7 @@ create table profiles (
   id uuid primary key default gen_random_uuid(),
   auth_user_id uuid unique references auth.users(id) on delete set null,
   name text not null,
+  first_name text,
   is_commissioner boolean not null default false,
   historical boolean not null default false,
   created_at timestamptz not null default now()

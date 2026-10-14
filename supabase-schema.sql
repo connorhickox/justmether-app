@@ -59,16 +59,21 @@ create table adjustments (
 );
 
 -- Helper: is the currently-authenticated user the commissioner?
+-- SECURITY DEFINER so this internal lookup bypasses RLS on profiles instead of
+-- re-triggering it -- without this, policies on profiles that call this
+-- function recurse into evaluating themselves and Postgres eventually fails
+-- with "stack depth limit exceeded".
 create or replace function is_commissioner() returns boolean
-language sql stable as $$
+language sql stable security definer set search_path = public as $$
   select exists (
     select 1 from profiles where auth_user_id = auth.uid() and is_commissioner = true
   );
 $$;
 
 -- Helper: profile id belonging to the currently-authenticated user (or null).
+-- SECURITY DEFINER for the same reason as is_commissioner() above.
 create or replace function my_profile_id() returns uuid
-language sql stable as $$
+language sql stable security definer set search_path = public as $$
   select id from profiles where auth_user_id = auth.uid();
 $$;
 

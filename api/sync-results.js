@@ -152,6 +152,44 @@ function parsePicksPage(html) {
   return { episodeNum: episodeNum, mysteryQuestion: mysteryQuestion, picksDeadline: picksDeadline };
 }
 
+// Parse the tribe-membership strip that appears at the top of every logged-in
+// page (results.asp included): a header <td class="SMALLTEXT"> per tribe
+// (containing a <b>TribeName</b>, no colspan=1) followed by one
+// <td class="SURVIVORNAMES"> per castaway (plain text name, colspan="1"),
+// each carrying the same background-color as the tribe it belongs to.
+// Matching by color (not position) is robust to however many rows the strip
+// wraps across. [colspan] scopes this to just the strip: the many other
+// inline-colored cells elsewhere on the page (per-player result cells,
+// "Picks Not Made" cells, etc.) never carry a colspan attribute.
+function parseTribes(html) {
+  var $ = cheerio.load(html);
+  var colorToTribe = {};
+  var tribeOf = {}; // display name -> color
+
+  $("td[style*='background-color'][colspan]").each(function () {
+    var el = $(this);
+    var style = el.attr("style") || "";
+    var colorMatch = style.match(/background-color:\s*(#[0-9a-fA-F]{3,6})/);
+    if (!colorMatch) return;
+    var color = colorMatch[1].toLowerCase();
+
+    var bTag = el.find("b").first();
+    if (bTag.length) {
+      colorToTribe[color] = bTag.text().trim();
+    } else {
+      var name = el.text().trim();
+      if (name) tribeOf[name] = color;
+    }
+  });
+
+  var result = {};
+  Object.keys(tribeOf).forEach(function (name) {
+    var tribeName = colorToTribe[tribeOf[name]];
+    if (tribeName) result[name] = tribeName;
+  });
+  return result; // {"Cristian": "Dina", "Alexis": "Savu", ...}
+}
+
 module.exports = async function handler(req, res) {
   if (process.env.CRON_SECRET) {
     var auth = req.headers["authorization"] || "";
@@ -181,6 +219,34 @@ module.exports = async function handler(req, res) {
 
     // ---- 1) Mirror the latest posted results (the episode that just aired) ----
     var resultsHtml = await siteGet(jar, "/game/results.asp");
+
+    // Tribe swaps/dispersals/absorptions happen mid-season and change both the
+    // number of tribes and who's on which -- mirror the site's own current
+    // membership strip so our roster never goes stale.
+    var tribesByName = parseTribes(resultsHtml);
+    var idToRow = {};
+    castawaysRes.data.forEach(function (c) { idToRow[c.id] = c; });
+    var tribeChanges = [];
+    for (var displayName in tribesByName) {
+      var castId = nameToId[displayName.toLowerCase()];
+      if (!castId) continue;
+      var newTribe = tribesByName[displayName];
+      var row = idToRow[castId];
+      if (row && row.tribe !== newTribe) {
+        tribeChanges.push(castId + ": \"" + (row.tribe || "none") + "\" -> \"" + newTribe + "\"");
+        var tribeUpdRes = await sb.from("castaways").update({ tribe: newTribe }).eq("id", castId);
+        if (tribeUpdRes.error) throw tribeUpdRes.error;
+        row.tribe = newTribe; // keep in-memory copy fresh for merge detection below
+      }
+    }
+    if (tribeChanges.length) {
+      var activeTribeNames = new Set(castawaysRes.data
+        .filter(function (c) { return !c.eliminated; })
+        .map(function (c) { return c.tribe; }));
+      log.push("Tribe changes detected (" + tribeChanges.length + "): " + tribeChanges.join(", ") +
+        " -- now " + activeTribeNames.size + " active tribe(s): " + Array.from(activeTribeNames).join(", "));
+    }
+
     var parsedResults = parseResultsPage(resultsHtml);
     var resultsSlugged = {
       reward: parsedResults.results.reward.map(slugify),

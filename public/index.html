@@ -885,6 +885,34 @@
     var errorBox = el("div", {class:"small", style:"margin-top:10px; display:none;"});
     card.appendChild(errorBox);
 
+    if (!isSignup){
+      var forgotLink = el("a", {href:"#", class:"small", style:"display:inline-block; margin-top:8px;"}, ["Forgot your password?"]);
+      forgotLink.addEventListener("click", async function(ev){
+        ev.preventDefault();
+        var email = emailInput.value.trim();
+        if (!email){
+          errorBox.style.color = "var(--danger)";
+          errorBox.textContent = "Enter your email above first, then click \"Forgot your password?\" again.";
+          errorBox.style.display = "block";
+          return;
+        }
+        forgotLink.textContent = "Sending…";
+        try {
+          var resetRes = await sb.auth.resetPasswordForEmail(email);
+          if (resetRes.error) throw resetRes.error;
+          errorBox.style.color = "var(--text)";
+          errorBox.textContent = "Check your email for a link to reset your password.";
+          errorBox.style.display = "block";
+        } catch(e){
+          errorBox.style.color = "var(--danger)";
+          errorBox.textContent = e.message || "Something went wrong.";
+          errorBox.style.display = "block";
+        }
+        forgotLink.textContent = "Forgot your password?";
+      });
+      card.appendChild(forgotLink);
+    }
+
     var submitBtn = el("button", {class:"btn primary", style:"width:100%; margin-top:16px;"}, [isSignup ? "Sign Up" : "Log In"]);
     submitBtn.addEventListener("click", async function(){
       errorBox.style.display = "none";

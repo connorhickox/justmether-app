@@ -1513,6 +1513,12 @@
         entry.row.lines.filter(function(l){ return EPISODE_CATS.indexOf(l.cat) !== -1; }).forEach(function(l){
           cardsWrap.appendChild(prCard(l));
         });
+        var perfectLine = entry.row.lines.filter(function(l){ return l.cat === "perfect"; })[0];
+        if (perfectLine){
+          cardsWrap.appendChild(el("span", {class:"pr-card mvp"}, [
+            "Perfect Pick Bonus: " + perfectLine.pts + "pts"
+          ]));
+        }
         prRow.appendChild(cardsWrap);
         prRow.appendChild(el("div", {class:"pr-total"}, [entry.row.total + " pts"]));
       } else {

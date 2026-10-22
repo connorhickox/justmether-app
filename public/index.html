@@ -1604,7 +1604,8 @@
 
     var rows = Object.keys(players).map(function(uid){
       var p = players[uid];
-      return { uid:uid, name: p.name || "Someone", hasAccount: !!p.authUserId, submittedAt: pickStatusData[uid] || null };
+      var displayName = (p.name || "Someone") + (p.firstName ? " (" + p.firstName + ")" : "");
+      return { uid:uid, name: displayName, hasAccount: !!p.authUserId, submittedAt: pickStatusData[uid] || null };
     });
     rows.sort(function(a,b){
       var aSub = !!a.submittedAt, bSub = !!b.submittedAt;
@@ -1860,7 +1861,9 @@
 
     var playerSelect = el("select", {class:"native"});
     Object.keys(players).forEach(function(uid){
-      playerSelect.appendChild(el("option", {value:uid}, [players[uid].name || uid]));
+      var p = players[uid];
+      var label = (p.name || uid) + (p.firstName ? " (" + p.firstName + ")" : "");
+      playerSelect.appendChild(el("option", {value:uid}, [label]));
     });
     var epSelect = el("select", {class:"native"});
     episodeList().forEach(function(e){ epSelect.appendChild(el("option", {value:e.number}, ["Episode "+e.number])); });

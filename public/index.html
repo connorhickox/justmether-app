@@ -1271,7 +1271,7 @@
 
     sec.appendChild(el("label", {class:"field-label"}, ["Most Valuable Player"]));
     sec.appendChild(el("div", {class:"small muted", style:"margin-bottom:8px;"}, [
-      priorMvp ? "Keep your pick to grow the streak, or switch to reset it to 10 pts." : "Pick your MVP to start earning streak bonuses."
+      "Score bonus points if your MVP is a correct answer for any questions below. Keep your pick to grow the streak, or switch to reset it to 10pts."
     ]));
     sec.appendChild(renderGroupedChips(activeCastaways(), draft.mvp, disabled, function(c){
       draft.mvp = c.id; rerenderPicksForm(draft, ep);

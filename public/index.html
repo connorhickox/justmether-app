@@ -1162,7 +1162,7 @@
 
     if (ep.isFinale){
       form.appendChild(el("div", {class:"divider"}));
-      form.appendChild(pickerSection("winner", "Who wins Survivor? (worth 500 points)", draft, deadlinePassed, ep));
+      form.appendChild(pickerSection("winner", "Who wins Survivor?", draft, deadlinePassed, ep));
     }
 
     if (!deadlinePassed){
@@ -1214,7 +1214,7 @@
 
   function pickerSection(cat, label, draft, disabled, ep){
     var sec = el("div", {style:"margin-bottom:16px;"});
-    sec.appendChild(el("label", {class:"field-label"}, [label]));
+    sec.appendChild(el("label", {class:"field-label"}, [label + " (" + catPoints(ep, cat) + " pts)"]));
     if (cat === "mystery" && ep.mysteryQuestion){
       sec.appendChild(el("div", {class:"small muted", style:"margin-bottom:10px;"}, [ep.mysteryQuestion]));
     }

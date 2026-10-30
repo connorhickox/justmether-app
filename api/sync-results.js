@@ -122,7 +122,11 @@ function parseResultsPage(html) {
     var names = [];
     row.find("td.TABLEDETAILCELL img").each(function () {
       var alt = $(this).attr("alt");
-      if (alt) names.push(alt.trim());
+      // The site uses a "NO PICK" placeholder icon (not a castaway) for
+      // categories with no challenge that episode -- e.g. no Reward
+      // challenge post-merge. Skip it so that episode just has an empty
+      // result for this category instead of crashing on an unknown name.
+      if (alt && alt.trim().toUpperCase() !== "NO PICK") names.push(alt.trim());
     });
     results[key] = names;
   });

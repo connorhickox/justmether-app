@@ -260,12 +260,24 @@ module.exports = async function handler(req, res) {
       winner: null,
     };
 
+    // Merge detection: if the active (non-eliminated, post-this-episode) castaways
+    // are all on one tribe, this episode itself is post-merge -- the merge twist
+    // and the first individual tribal council often happen in the same episode,
+    // so this must be decided for the episode just locked, not only the next one.
+    var afterElim = castawaysRes.data.map(function (c) {
+      return resultsSlugged.votedOff.indexOf(c.id) >= 0 ? Object.assign({}, c, { eliminated: true }) : c;
+    });
+    var activeTribes = {};
+    afterElim.forEach(function (c) { if (!c.eliminated) activeTribes[c.tribe] = true; });
+    var merged = Object.keys(activeTribes).length <= 1;
+
     var upsertEp = await sb.from("episodes").upsert(
-      { number: parsedResults.episodeNum, locked: true, results: resultsSlugged },
+      { number: parsedResults.episodeNum, locked: true, results: resultsSlugged, merged: merged },
       { onConflict: "number" }
     );
     if (upsertEp.error) throw upsertEp.error;
-    log.push("Locked/updated episode " + parsedResults.episodeNum + " with results: " + JSON.stringify(resultsSlugged));
+    log.push("Locked/updated episode " + parsedResults.episodeNum + " with results: " + JSON.stringify(resultsSlugged) +
+      " (merged=" + merged + ")");
 
     // Mark anyone voted off this episode as eliminated.
     for (var i = 0; i < resultsSlugged.votedOff.length; i++) {
@@ -285,14 +297,7 @@ module.exports = async function handler(req, res) {
       var existingEp = await sb.from("episodes").select("number").eq("number", parsedPicks.episodeNum).maybeSingle();
       if (existingEp.error) throw existingEp.error;
 
-      // Merge detection: if the active (non-eliminated) castaways are all on one tribe, it's merged.
-      var afterElim = castawaysRes.data.map(function (c) {
-        return resultsSlugged.votedOff.indexOf(c.id) >= 0 ? Object.assign({}, c, { eliminated: true }) : c;
-      });
-      var activeTribes = {};
-      afterElim.forEach(function (c) { if (!c.eliminated) activeTribes[c.tribe] = true; });
-      var merged = Object.keys(activeTribes).length <= 1;
-
+      // Once merged, every later episode stays merged too (tribes don't un-merge).
       var upsertNext = await sb.from("episodes").upsert(
         {
           number: parsedPicks.episodeNum,
